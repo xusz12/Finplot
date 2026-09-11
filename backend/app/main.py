@@ -4,6 +4,7 @@ from __future__ import annotations
 import hashlib
 import os
 import sqlite3
+import uuid
 from contextlib import contextmanager
 from datetime import date, timedelta
 from pathlib import Path
@@ -15,6 +16,7 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 MAX_PAGE = 200
+INSTANCE_ID = uuid.uuid4().hex
 ALLOWED_NATURES = {"日常", "投资", "往来", "调整"}
 ALLOWED_DIRECTIONS = {"收入", "支出"}
 
@@ -185,7 +187,7 @@ def dashboard(kind: str = "month", value: str | None = None, start: str | None =
             tag_rows = conn.execute("SELECT code,name FROM tags WHERE active=1 ORDER BY name").fetchall()
             cutoff = conn.execute("SELECT min(occurred_at) first,max(occurred_at) last FROM transactions").fetchone()
             income, expense = int(totals['income']), int(totals['expense'])
-            return {"version": version(conn,path), "scope": {"kind":kind,"label":label,"start":start,"end_exclusive":end,"timezone":"Asia/Shanghai"}, "data_range":{"first":cutoff['first'],"last":cutoff['last']}, "filtered_count":int(totals['count']), "totals":{"income_cents":str(income),"expense_cents":str(expense),"balance_cents":str(income-expense),"income_yuan":money(income),"expense_yuan":money(expense),"balance_yuan":money(income-expense)}, "trend":[{"day":r['day'],"income_cents":str(r['income']),"expense_cents":str(r['expense'])} for r in trend], "categories":[{**dict(r),"cents":str(r['cents'])} for r in categories], "transactions":[{**dict(r),"amount_cents":str(r['amount_cents']),"tags": [x for x in r['tags'].split(',') if x]} for r in rows], "tags":[dict(r) for r in tag_rows]}
+            return {"version": f"{INSTANCE_ID}:{version(conn,path)}", "instance_id": INSTANCE_ID, "scope": {"kind":kind,"label":label,"start":start,"end_exclusive":end,"timezone":"Asia/Shanghai"}, "data_range":{"first":cutoff['first'],"last":cutoff['last']}, "filtered_count":int(totals['count']), "totals":{"income_cents":str(income),"expense_cents":str(expense),"balance_cents":str(income-expense),"income_yuan":money(income),"expense_yuan":money(expense),"balance_yuan":money(income-expense)}, "trend":[{"day":r['day'],"income_cents":str(r['income']),"expense_cents":str(r['expense'])} for r in trend], "categories":[{**dict(r),"cents":str(r['cents'])} for r in categories], "transactions":[{**dict(r),"amount_cents":str(r['amount_cents']),"tags": [x for x in r['tags'].split(',') if x]} for r in rows], "tags":[dict(r) for r in tag_rows]}
     except sqlite3.Error as exc:
         raise HTTPException(503, "ledger unavailable") from exc
 
