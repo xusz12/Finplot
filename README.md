@@ -10,6 +10,8 @@ python3 -m venv .venv
 LEDGER_DB=/absolute/path/to/ledger.sqlite3 .venv/bin/uvicorn backend.app.main:app --host 127.0.0.1 --port 8765
 ```
 
+Keep the terminal running while using the page. Open `http://127.0.0.1:8765/` in a browser on this Mac. Stop the local instance with `Ctrl-C` in the uvicorn terminal; it does not modify the ledger.
+
 For the synthetic demo database only:
 
 ```sh
@@ -25,6 +27,12 @@ The dashboard is the vanilla JavaScript page in `frontend/` and is served by the
 
 ```sh
 python3 -m unittest discover -s tests -v
+```
+
+The synthetic performance check is isolated and reproducible:
+
+```sh
+.venv/bin/python tests/benchmark.py
 ```
 
 Tests create isolated temporary SQLite databases only. Do not use a real ledger for change/refresh tests. API responses have `Cache-Control: no-store`, loopback Host and same-origin Origin checks, and a same-origin CSP. Request logging deliberately excludes query parameters and transaction data.
