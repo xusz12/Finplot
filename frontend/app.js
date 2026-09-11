@@ -8,7 +8,10 @@ const state = {
   group: null,
   category: null,
   lastSync: null,
+  renderEpoch: null,
   polling: false,
+  pendingPerf: null,
+  perf: { initial: null, filter: [], drill: [], refresh: [], refreshEpochs: [] },
 };
 
 const money = (value) => {
@@ -89,7 +92,20 @@ const params = (cursor = null) => {
 };
 
 const setStatus = (text) => { $('#status').textContent = text; };
-const clock = () => state.lastSync ? new Date(state.lastSync).toLocaleTimeString('zh-CN', { hour12: false }) : '—';
+const clock = () => state.lastSync ? new Date(state.lastSync).toLocaleTimeString('zh-CN', { hour12: false, fractionalSecondDigits: 3 }) : '—';
+
+const formatPerf = (value) => value === null ? '—' : `${value.toFixed(1)}ms`;
+const recordPerf = () => {
+  if (!state.pendingPerf) return;
+  const { kind, started } = state.pendingPerf;
+  const elapsed = performance.now() - started;
+  if (kind === 'initial') state.perf.initial = elapsed;
+  else if (state.perf[kind]) state.perf[kind].push(elapsed);
+  state.pendingPerf = null;
+  const last = (values) => values.length ? values[values.length - 1] : null;
+  const max = (values) => values.length ? Math.max(...values) : null;
+  $('#perf').textContent = `首屏 ${formatPerf(state.perf.initial)} · 筛选 ${state.perf.filter.length}/20（最新 ${formatPerf(last(state.perf.filter))}，最大 ${formatPerf(max(state.perf.filter))}） · 钻取 ${state.perf.drill.length}/20（最新 ${formatPerf(last(state.perf.drill))}，最大 ${formatPerf(max(state.perf.drill))}） · 自动刷新 ${state.perf.refresh.length}（最新 ${formatPerf(last(state.perf.refresh))}，最大 ${formatPerf(max(state.perf.refresh))}） · 刷新 epochs [${state.perf.refreshEpochs.join(',')}] · 最近渲染 epoch ${state.renderEpoch === null ? '—' : state.renderEpoch}`;
+};
 
 const renderTags = (available) => {
   const codes = new Set(available.map((tag) => tag.code));
@@ -112,7 +128,7 @@ const renderTags = (available) => {
       else state.selectedTags.delete(tag.code);
       state.group = null;
       state.category = null;
-      loadDashboard();
+      loadDashboard({ perfKind: 'filter' });
     });
     add(label, 'span', tag.name);
   }
@@ -171,7 +187,7 @@ const renderCategories = (groups, categories) => {
     drillButton(section, `${group.group_name} · ${money(group.cents)} · ${group.count} 笔`, 'group-button', () => {
       state.group = state.group === group.group_code ? null : group.group_code;
       state.category = null;
-      loadDashboard();
+      loadDashboard({ perfKind: 'drill' });
     }, state.group === group.group_code);
     const list = add(section, 'div');
     list.className = 'category-list';
@@ -179,7 +195,7 @@ const renderCategories = (groups, categories) => {
       drillButton(list, `${category.name} · ${money(category.cents)} · ${category.count} 笔`, 'category-button', () => {
         state.group = category.group_code;
         state.category = state.category === category.code ? null : category.code;
-        loadDashboard();
+        loadDashboard({ perfKind: 'drill' });
       }, state.category === category.code);
     }
   }
@@ -217,12 +233,17 @@ const renderData = (data, append = false) => {
   state.nextCursor = data.next_cursor;
   $('#more').disabled = !state.nextCursor;
   $('#page-meta').textContent = `已显示 ${data.transactions.length}${data.next_cursor ? ' · 可继续加载' : ''}`;
+  const pendingKind = state.pendingPerf?.kind;
+  state.renderEpoch = Date.now();
+  if (pendingKind === 'refresh') state.perf.refreshEpochs.push(state.renderEpoch);
+  recordPerf();
 };
 
-const loadDashboard = async ({ append = false, cursor = null } = {}) => {
+const loadDashboard = async ({ append = false, cursor = null, perfKind = null } = {}) => {
   const mine = ++state.serial;
   if (state.controller) state.controller.abort();
   state.controller = new AbortController();
+  if (perfKind) state.pendingPerf = { kind: perfKind, started: perfKind === 'initial' ? 0 : performance.now() };
   if (!append) {
     state.nextCursor = null;
     $('#more').disabled = true;
@@ -233,7 +254,7 @@ const loadDashboard = async ({ append = false, cursor = null } = {}) => {
       if (mine === state.serial) {
         state.version = null;
         setStatus('数据已变化，正在重新同步…');
-        await loadDashboard();
+        await loadDashboard({ perfKind });
       }
       return;
     }
@@ -257,7 +278,7 @@ const pollVersion = async () => {
     const response = await fetch('/api/version', { cache: 'no-store' });
     if (!response.ok) throw new Error('暂时无法检查数据版本');
     const probe = await response.json();
-    if (!state.version || probe.version !== state.version) await loadDashboard();
+    if (!state.version || probe.version !== state.version) await loadDashboard({ perfKind: 'refresh' });
     else setStatus(`已同步 · ${clock()}`);
   } catch (error) {
     setStatus(error.message || '暂时无法检查数据版本');
@@ -269,7 +290,7 @@ const pollVersion = async () => {
 const resetAndLoad = () => {
   state.group = null;
   state.category = null;
-  loadDashboard();
+  loadDashboard({ perfKind: 'filter' });
 };
 
 $('#value').value = nowInShanghai().slice(0, 7);
@@ -280,4 +301,4 @@ $('#reload').addEventListener('click', resetAndLoad);
 $('#more').addEventListener('click', () => { if (state.nextCursor) loadDashboard({ append: true, cursor: state.nextCursor }); });
 document.addEventListener('visibilitychange', () => { if (!document.hidden) loadDashboard(); });
 setInterval(pollVersion, 2000);
-loadDashboard();
+loadDashboard({ perfKind: 'initial' });

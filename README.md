@@ -35,4 +35,6 @@ The synthetic performance check is isolated and reproducible:
 .venv/bin/python tests/benchmark.py
 ```
 
+The browser-side 20-sample render and concurrent-refresh evidence is recorded in `reports/performance-2026-09-12.md`. The open diagnostics panel on the page shows the current initial/filter/drill timings, automatic-refresh count, and refresh epochs; these are browser render-complete measurements, not API-only timings. Chrome compositor-paint timing is not exposed by the local accessibility harness and remains a separately unverified item.
+
 Tests create isolated temporary SQLite databases only. Do not use a real ledger for change/refresh tests. API responses have `Cache-Control: no-store`, loopback Host and same-origin Origin checks, and a same-origin CSP. Request logging deliberately excludes query parameters and transaction data.
