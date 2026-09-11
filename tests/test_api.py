@@ -41,6 +41,39 @@ class ObservatoryApiTests(unittest.TestCase):
         self.assertEqual(all_result["filtered_count"], 1)
         self.assertEqual(any_result["totals"]["expense_cents"], "1299")
 
+    def test_tag_options_drilldown_investment_and_stable_cursor_pages(self):
+        first = self.get("/api/dashboard", params={"kind": "all", "limit": 2}).json()
+        self.assertEqual({tag["code"] for tag in first["tags"]}, {"ai", "subscription"})
+        self.assertEqual(first["investment"]["income_cents"], "5000")
+        self.assertEqual(first["investment"]["expense_cents"], "2000")
+        self.assertEqual(first["investment"]["net_cents"], "3000")
+        self.assertEqual(len(first["transactions"]), 2)
+        self.assertTrue(first["next_cursor"])
+
+        second = self.get("/api/dashboard", params={"kind": "all", "limit": 2, "cursor": first["next_cursor"]})
+        self.assertEqual(second.status_code, 200)
+        second_body = second.json()
+        self.assertEqual(len(second_body["transactions"]), 2)
+        self.assertTrue(first["transactions"][-1]["occurred_at"] > second_body["transactions"][0]["occurred_at"])
+
+        group = self.get("/api/dashboard", params={"kind": "all", "group": "exp_life"}).json()
+        category = self.get("/api/dashboard", params={"kind": "all", "category": "exp_food"}).json()
+        self.assertEqual(group["filtered_count"], 3)
+        self.assertEqual(category["filtered_count"], 2)
+        self.assertEqual({row["category_code"] for row in category["transactions"]}, {"exp_food"})
+
+    def test_cursor_and_version_conflict_after_dataset_change(self):
+        first = self.get("/api/dashboard", params={"kind": "all", "limit": 2}).json()
+        import sqlite3
+        conn = sqlite3.connect(self.db)
+        conn.execute("INSERT INTO transactions VALUES(6,'2026-09-03 00:00:00','支出',700,1,'')")
+        conn.commit(); conn.close()
+        stale_cursor = self.get("/api/dashboard", params={"kind": "all", "limit": 2, "cursor": first["next_cursor"]})
+        stale_version = self.get("/api/dashboard", params={"kind": "all", "version": first["version"]})
+        self.assertEqual(stale_cursor.status_code, 409)
+        self.assertEqual(stale_version.status_code, 409)
+        self.assertIn("version", stale_cursor.json()["detail"])
+
     def test_closed_open_custom_date_and_validation(self):
         body = self.get("/api/dashboard", params={"kind":"custom","start":"2026-08-31","end":"2026-08-31"}).json()
         self.assertEqual(body["filtered_count"], 1)
@@ -50,6 +83,8 @@ class ObservatoryApiTests(unittest.TestCase):
         self.assertEqual(self.get("/api/dashboard", headers={"host":"example.test"}).status_code, 403)
         self.assertEqual(self.get("/api/dashboard", headers={"host":"localhost.evil"}).status_code, 403)
         self.assertEqual(self.get("/api/dashboard", headers={"origin":"https://example.test"}).status_code, 403)
+        self.assertEqual(self.get("/api/dashboard", headers={"origin":"https://localhost"}).status_code, 403)
+        self.assertEqual(self.get("/api/dashboard", headers={"origin":"http://localhost:9999"}).status_code, 403)
         self.assertEqual(self.get("/api/dashboard", params={"limit":201}).status_code, 422)
 
     def test_version_changes_for_writes_and_initial_load_is_valid(self):

@@ -1,1 +1,47 @@
-<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>账单监控站</title><link rel="stylesheet" href="/style.css"><body><header><div><small>LOCAL · READ ONLY</small><h1>账单监控站</h1></div><div id="status">连接中…</div></header><main><section class="controls"><select id="kind"><option value="month">月</option><option value="day">日</option><option value="quarter">季度</option><option value="half">半年</option><option value="year">年</option><option value="all">全部</option><option value="custom">自选</option></select><input id="value" aria-label="时间范围"><input id="start" type="date"><input id="end" type="date"><select id="mode"><option value="any">标签：任一</option><option value="all">标签：全部</option></select><button id="reload">更新</button></section><p id="meta"></p><section class="cards"><article><span>收入</span><strong id="income">—</strong></article><article><span>支出</span><strong id="expense">—</strong></article><article><span>净收支</span><strong id="balance">—</strong></article><article><span>筛选笔数</span><strong id="count">—</strong></article></section><section class="grid"><article><h2>每日趋势</h2><div id="trend" class="bars"></div></article><article><h2>分类钻取</h2><div id="categories"></div></article></section><section><h2>交易明细</h2><div class="table"><table><thead><tr><th>日期</th><th>方向</th><th>分类</th><th>标签</th><th>金额</th></tr></thead><tbody id="rows"></tbody></table></div></section></main><script src="/app.js"></script></body></html>
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>账单监控站</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header>
+    <div><small>LOCAL · READ ONLY</small><h1>账单监控站</h1></div>
+    <div id="status" role="status" aria-live="polite">连接中…</div>
+  </header>
+  <main>
+    <section class="controls" aria-label="筛选条件">
+      <label>范围<select id="kind"><option value="month">月</option><option value="day">日</option><option value="quarter">季度</option><option value="half">半年</option><option value="year">年</option><option value="all">全部</option><option value="custom">自选</option></select></label>
+      <label id="value-label">周期<input id="value" aria-label="时间范围"></label>
+      <label>开始<input id="start" type="date"></label>
+      <label>结束<input id="end" type="date"></label>
+      <label>方向<select id="direction"><option value="">全部方向</option><option value="收入">收入</option><option value="支出">支出</option></select></label>
+      <label>性质<select id="nature"><option value="">全部性质</option><option value="日常">日常</option><option value="投资">投资</option><option value="往来">往来</option><option value="调整">调整</option></select></label>
+      <label>标签匹配<select id="mode"><option value="any">任一标签</option><option value="all">全部标签</option></select></label>
+      <button id="reload" type="button">更新</button>
+    </section>
+    <fieldset class="tag-picker"><legend>标签</legend><div id="tags" class="tag-options"><span class="muted">加载中…</span></div></fieldset>
+    <p id="meta"></p>
+    <p id="drill-path" class="drill-path" aria-live="polite">当前分类：全部</p>
+    <section class="cards">
+      <article><span>收入</span><strong id="income">—</strong></article>
+      <article><span>支出</span><strong id="expense">—</strong></article>
+      <article><span>净收支</span><strong id="balance">—</strong></article>
+      <article><span>筛选笔数</span><strong id="count">—</strong></article>
+      <article class="investment"><span>投资净损益</span><strong id="investment">—</strong><small id="investment-meta">收入 — · 支出 —</small></article>
+    </section>
+    <section class="grid">
+      <article><h2>每日趋势</h2><div id="trend" class="bars" aria-label="每日收支趋势"></div></article>
+      <article><h2>分类钻取</h2><div id="categories"></div></article>
+    </section>
+    <section>
+      <h2>交易明细</h2>
+      <div class="table"><table><thead><tr><th>日期</th><th>方向</th><th>分类</th><th>标签</th><th>金额</th></tr></thead><tbody id="rows"></tbody></table></div>
+      <div class="table-actions"><button id="more" type="button" disabled>加载更多</button><span id="page-meta" class="muted"></span></div>
+    </section>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>
