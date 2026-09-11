@@ -122,9 +122,12 @@ def filters(start, end, tags: list[str], tag_mode: str, nature: str | None, dire
 
 
 def version(conn: sqlite3.Connection, path: Path) -> str:
-    ident = path.stat()
-    change = conn.execute("PRAGMA data_version").fetchone()[0]
-    return hashlib.sha256(f"{ident.st_dev}:{ident.st_ino}:{ident.st_mtime_ns}:{ident.st_size}:{change}".encode()).hexdigest()[:16]
+    # Hash logical rows inside the same read transaction; data_version alone is
+    # connection-local and file mtimes do not reliably advance for WAL commits.
+    parts = []
+    for table, columns in (("transactions", "id||'/'||occurred_at||'/'||direction||'/'||amount_cents||'/'||category_id"), ("categories", "id||'/'||code||'/'||name||'/'||group_id"), ("category_groups", "id||'/'||code||'/'||name"), ("tags", "id||'/'||code||'/'||name"), ("transaction_tags", "transaction_id||'/'||tag_id")):
+        parts.append(conn.execute(f"SELECT coalesce(group_concat({columns}, '|'), '') FROM {table}").fetchone()[0])
+    return hashlib.sha256("\n".join(parts).encode()).hexdigest()[:16]
 
 
 def require_schema(conn: sqlite3.Connection) -> None:
@@ -144,13 +147,19 @@ app.add_middleware(CORSMiddleware, allow_origins=[], allow_methods=[], allow_hea
 
 @app.middleware("http")
 async def privacy_headers(request: Request, call_next):
-    host = request.headers.get("host", "")
-    if host and not (host.startswith("127.0.0.1") or host.startswith("localhost")):
+    host = request.headers.get("host", "").split(":", 1)[0].lower()
+    origin = request.headers.get("origin")
+    allowed = {"127.0.0.1", "localhost"}
+    if host and host not in allowed:
         return JSONResponse({"detail": "loopback host required"}, status_code=403)
+    if origin:
+        from urllib.parse import urlparse
+        if urlparse(origin).hostname not in allowed:
+            return JSONResponse({"detail": "same-origin required"}, status_code=403)
     response = await call_next(request)
     response.headers["Cache-Control"] = "no-store"
     response.headers["X-Content-Type-Options"] = "nosniff"
-    response.headers["Content-Security-Policy"] = "default-src 'self'; connect-src 'self'"
+    response.headers["Content-Security-Policy"] = "default-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'"
     return response
 
 @app.get("/api/dashboard")
