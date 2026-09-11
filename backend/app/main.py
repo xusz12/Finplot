@@ -125,8 +125,10 @@ def version(conn: sqlite3.Connection, path: Path) -> str:
     # Hash logical rows inside the same read transaction; data_version alone is
     # connection-local and file mtimes do not reliably advance for WAL commits.
     parts = []
-    for table, columns in (("transactions", "id||'/'||occurred_at||'/'||direction||'/'||amount_cents||'/'||category_id"), ("categories", "id||'/'||code||'/'||name||'/'||group_id"), ("category_groups", "id||'/'||code||'/'||name"), ("tags", "id||'/'||code||'/'||name"), ("transaction_tags", "transaction_id||'/'||tag_id")):
-        parts.append(conn.execute(f"SELECT coalesce(group_concat({columns}, '|'), '') FROM {table}").fetchone()[0])
+    for table, columns in (("transactions", "id,occurred_at,direction,amount_cents,category_id,note"), ("categories", "id,code,name,group_id,direction,nature,active,sort_order"), ("category_groups", "id,code,name,direction,active,sort_order"), ("tags", "id,code,name,active"), ("transaction_tags", "transaction_id,tag_id,source")):
+        # quote() and an explicit order make the serialized fingerprint unambiguous and stable.
+        row_expr = "||','||".join(f"quote({c})" for c in columns.split(","))
+        parts.append(conn.execute(f"SELECT coalesce(group_concat(row_data, char(10)), '') FROM (SELECT {row_expr} row_data FROM {table} ORDER BY rowid)").fetchone()[0])
     return hashlib.sha256("\n".join(parts).encode()).hexdigest()[:16]
 
 
@@ -153,8 +155,8 @@ async def privacy_headers(request: Request, call_next):
     if host and host not in allowed:
         return JSONResponse({"detail": "loopback host required"}, status_code=403)
     if origin:
-        from urllib.parse import urlparse
-        if urlparse(origin).hostname not in allowed:
+        expected_origin = f"{request.url.scheme}://{request.headers.get('host', '')}"
+        if origin.rstrip("/") != expected_origin.rstrip("/"):
             return JSONResponse({"detail": "same-origin required"}, status_code=403)
     response = await call_next(request)
     response.headers["Cache-Control"] = "no-store"

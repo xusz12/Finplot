@@ -63,7 +63,7 @@ class ObservatoryApiTests(unittest.TestCase):
         self.assertNotEqual(first, second)
         conn = sqlite3.connect(self.db)
         conn.execute("INSERT INTO transactions VALUES(6,'2026-09-03 00:00:00','支出',2,1,'')")
-        conn.execute("INSERT INTO transaction_tags VALUES(6,1)")
+        conn.execute("INSERT INTO transaction_tags(transaction_id,tag_id) VALUES(6,1)")
         conn.commit(); conn.close()
         third = self.get("/api/dashboard", params=query).json()["version"]
         self.assertNotEqual(second, third)
