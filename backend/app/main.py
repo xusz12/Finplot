@@ -12,6 +12,7 @@ from urllib.parse import quote
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 MAX_PAGE = 200
 ALLOWED_NATURES = {"日常", "投资", "往来", "调整"}
@@ -176,3 +177,6 @@ def dashboard(kind: str = "month", value: str | None = None, start: str | None =
             return {"version": version(conn,path), "scope": {"kind":kind,"label":label,"start":start,"end_exclusive":end,"timezone":"Asia/Shanghai"}, "data_range":{"first":cutoff['first'],"last":cutoff['last']}, "filtered_count":int(totals['count']), "totals":{"income_cents":str(income),"expense_cents":str(expense),"balance_cents":str(income-expense),"income_yuan":money(income),"expense_yuan":money(expense),"balance_yuan":money(income-expense)}, "trend":[{"day":r['day'],"income_cents":str(r['income']),"expense_cents":str(r['expense'])} for r in trend], "categories":[{**dict(r),"cents":str(r['cents'])} for r in categories], "transactions":[{**dict(r),"amount_cents":str(r['amount_cents']),"tags": [x for x in r['tags'].split(',') if x]} for r in rows], "tags":[dict(r) for r in tag_rows]}
     except sqlite3.Error as exc:
         raise HTTPException(503, "ledger unavailable") from exc
+
+
+app.mount("/", StaticFiles(directory=Path(__file__).parents[2] / "frontend", html=True), name="frontend")
