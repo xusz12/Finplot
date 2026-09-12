@@ -19,3 +19,11 @@ Owner: 老殷. Baseline: 119f49c. User request: replace the rough initial UI wit
 - Confirmed sync time visibly renders HH:MM:SS.
 - Existing real instance 8766 serves updated page with HTTP 200; no backend/DB mutation is part of this change.
 - Mobile visual verification and extended browser interaction are pending: after attempting DevTools device mode the native Chrome surface started returning only window titles with no AX contents or screenshot. Do not treat CSS breakpoint inspection as browser verification.
+
+## Follow-up: native mobile verification (08:00Z)
+The native Chrome AX/screenshot channel recovered. Device toolbar explicitly showed
+390px width. Visually checked page top/navigation, two-column filters and metric
+cards, investment strip, stacked trend/category panels. Selected subscription tag:
+0 transactions, explanatory empty chart, empty categories/table, shown count 0.
+Reset cleared the checkbox and restored 43 transactions. Remaining extended
+pagination/long-range checks are with the implementation reviewer.
