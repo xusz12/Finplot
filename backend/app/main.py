@@ -730,9 +730,22 @@ def _summary_delta(current: dict, compare: dict | None) -> dict | None:
             "delta": delta,
         }
         if field.endswith("cents"):
-            ratio, reason = _ratio(delta, compare_value)
+            if field == "balance_cents" and (current_value < 0 or compare_value < 0):
+                ratio, reason = None, "negative_balance"
+            else:
+                ratio, reason = _ratio(delta, compare_value)
             result[field]["change_ratio"] = ratio
             result[field]["change_ratio_reason"] = reason
+            if field == "balance_cents":
+                def state(value: int) -> str:
+                    return "surplus" if value > 0 else "deficit" if value < 0 else "zero"
+                result[field]["current_state"] = state(current_value)
+                result[field]["compare_state"] = state(compare_value)
+                result[field]["state_change"] = (
+                    "转盈" if current_value > 0 and compare_value <= 0 else
+                    "转亏" if current_value < 0 and compare_value >= 0 else
+                    "状态不变"
+                )
     return result
 
 
@@ -935,15 +948,16 @@ def _calendar_view(current_start: date | None, current_end: date | None,
         in_scope = bool(current_start and current_end and current_start <= day < current_end)
         future = day > today
         item = by_day.get(day, {"expense": 0, "count": 0})
+        visible = in_scope
         days.append({
             "date": day.isoformat(),
             "weekday": day.weekday(),
             "in_scope": in_scope,
             "is_future": future,
-            "expense_cents": str(item["expense"]) if in_scope and not future else None,
-            "expense_yuan": money(item["expense"]) if in_scope and not future else None,
-            "transaction_count": item["count"] if in_scope and not future else None,
-            "empty_label": "无记录" if in_scope and not future and item["count"] == 0 else None,
+            "expense_cents": str(item["expense"]) if visible else None,
+            "expense_yuan": money(item["expense"]) if visible else None,
+            "transaction_count": item["count"] if visible else None,
+            "empty_label": "无记录" if visible and item["count"] == 0 else None,
         })
     total = sum(int(item["expense_cents"]) for item in days if item["expense_cents"] is not None)
     return {
@@ -1066,6 +1080,9 @@ def analytics(kind: str = "month", value: str | None = None,
             trend = _trend(conn, current_start, current_end, compare_start_date,
                            compare_end_date, grain, current_rows, compare_rows, today)
             daily = _daily_metrics(current_summary, current_start, current_end)
+            daily_nature = next(item for item in current_summary["nature"] if item["nature"] == "日常")
+            daily["daily_balance_rate"] = daily_nature["balance_rate"]
+            daily["daily_balance_rate_reason"] = daily_nature["balance_rate_reason"]
             three_month = _three_month_reference(
                 conn, current_start, tags, tag_mode, nature, direction, group, category,
                 data_first, data_last)

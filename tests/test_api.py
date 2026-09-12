@@ -113,4 +113,55 @@ class ObservatoryApiTests(unittest.TestCase):
         self.assertNotIn("innerHTML", source)
         self.assertIn("textContent", source)
 
+    def test_analytics_contract_has_same_snapshot_comparison_and_conservation(self):
+        response = self.get("/api/analytics", params={
+            "kind": "custom", "start": "2026-08-31", "end": "2026-09-02",
+            "compare": "custom", "compare_start": "2024-02-29", "compare_end": "2024-02-29",
+            "period_mode": "full", "grain": "day",
+        })
+        self.assertEqual(response.status_code, 200)
+        body = response.json()
+        self.assertEqual(body["contract_version"], "1.1")
+        self.assertTrue(body["comparison"]["same_snapshot"])
+        self.assertEqual(body["scope"]["end_exclusive"], "2026-09-03")
+        self.assertEqual(body["comparison"]["compare"]["end_exclusive"], "2024-03-01")
+        self.assertEqual(body["totals"]["income_cents"], "5000")
+        self.assertEqual(body["totals"]["expense_cents"], "3299")
+        self.assertEqual(body["daily_expense"]["effective_days"], 3)
+        self.assertEqual(body["daily_expense"]["daily_expense_cents"], "1099.6667")
+        self.assertEqual(sum(int(item["expense_cents"]) for item in body["periods"]), 3299)
+        self.assertEqual(body["expense_calendar"]["total_expense_cents"], "1299")
+        for direction, total_key in (("income", "income_cents"), ("expense", "expense_cents")):
+            changes = body["category_changes_by_direction"][direction]
+            self.assertEqual(
+                sum(int(item["delta_cents"]) for item in changes),
+                int(body["category_change_totals"][direction]["delta_cents"]),
+            )
+        nature_total_income = sum(int(item["income_cents"]) for item in body["nature_breakdown"])
+        nature_total_expense = sum(int(item["expense_cents"]) for item in body["nature_breakdown"])
+        self.assertEqual(nature_total_income, 5000)
+        self.assertEqual(nature_total_expense, 3299)
+        self.assertEqual(len(body["overview_12_months"]["months"]), 12)
+
+    def test_analytics_zero_base_and_all_scope_are_explicit(self):
+        all_body = self.get("/api/analytics", params={"kind": "all"}).json()
+        self.assertFalse(all_body["comparison"]["available"])
+        self.assertEqual(all_body["comparison"]["reason"], "all_scope_requires_custom_dates")
+        self.assertEqual(all_body["totals"]["income_cents"], "10005000")
+        no_base = self.get("/api/analytics", params={
+            "kind": "month", "value": "2026-08", "compare": "previous", "period_mode": "full",
+        }).json()
+        self.assertIsNone(no_base["summary"]["delta"]["expense_cents"]["change_ratio"])
+        self.assertEqual(no_base["summary"]["delta"]["expense_cents"]["change_ratio_reason"], "no_base")
+        self.assertEqual(no_base["summary"]["delta"]["balance_cents"]["change_ratio_reason"], "negative_balance")
+
+    def test_analytics_rejects_ambiguous_comparison(self):
+        self.assertEqual(self.get("/api/analytics", params={
+            "kind": "month", "value": "2026-08", "compare": "custom",
+        }).status_code, 422)
+        self.assertEqual(self.get("/api/analytics", params={
+            "kind": "month", "value": "2026-08", "compare": "none",
+            "compare_start": "2026-01-01", "compare_end": "2026-01-02",
+        }).status_code, 422)
+
 if __name__ == '__main__': unittest.main()
