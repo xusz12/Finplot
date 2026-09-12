@@ -57,7 +57,11 @@ window.LedgerCharts = (() => {
       const bars = shown.filter(s => !s.line), bw = Math.min(18, slot * .8 / Math.max(1,bars.length));
       shown.forEach(s => {
         if (p[s.key] == null) return;
-        if (s.line) node(group, 'circle', {cx: x(i), cy: y(p[s.key]), r: 3, class: `plot-fill series-${s.color}`});
+        if (s.line) {
+          const dot = node(group, 'circle', {cx: x(i), cy: y(p[s.key]), r: 5, tabindex: '0', role: 'button', 'aria-label': `${p.label} · ${s.label} ${format(p[s.key])} · ${p.range || ''}`, class: `plot-fill series-${s.color}`});
+          dot.addEventListener('click', e => {e.stopPropagation(); tooltip.textContent = text; onSelect?.(p,s);});
+          dot.addEventListener('keydown', e => {if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();tooltip.textContent=text;onSelect?.(p,s);}});
+        }
         else {
           const yy = y(p[s.key]), baseline = y(0);
           const bar = node(group, 'rect', {x: x(i) + (bars.indexOf(s) - bars.length / 2) * bw, y: Math.min(yy, baseline), width: Math.max(2,bw - 2), height: Math.max(1,Math.abs(baseline - yy)), rx: 2, class: `plot-fill series-${s.color}${s.compare ? ' compare-bar' : ''}`});
@@ -79,5 +83,26 @@ window.LedgerCharts = (() => {
     }));
     container.append(details);
   }
-  return {draw, money};
+  function horizontal(container, items, onSelect) {
+    container.replaceChildren();
+    if (!items.length) return;
+    const width = Math.max(520, container.clientWidth), height = items.length * 48 + 38;
+    const scroll = document.createElement('div'); scroll.className = 'plot-scroll'; container.append(scroll);
+    const svg = node(scroll,'svg',{viewBox:`0 0 ${width} ${height}`,width,height,class:'analytics-svg',role:'group','aria-label':'分类金额增减，左侧减少、右侧增加'});
+    const center = 175 + (width - 190) / 2, extent = (width - 220) / 2;
+    const max = items.reduce((n,item)=>{const v=BigInt(item.delta_cents);return (v<0n?-v:v)>n?(v<0n?-v:v):n;},1n);
+    node(svg,'text',{x:center-20,y:16,'text-anchor':'end',class:'chart-label'},'← 减少');
+    node(svg,'text',{x:center+20,y:16,class:'chart-label'},'增加 →');
+    node(svg,'line',{x1:center,x2:center,y1:22,y2:height,class:'zero-axis'});
+    items.forEach((item,i)=>{
+      const value=BigInt(item.delta_cents), length=Number((value<0n?-value:value)*10000n/max)/10000*extent, y=i*48+30;
+      const group=node(svg,'g',{tabindex:'0',role:'button','aria-label':`${item.category_name}，差额 ${money(value)}，本期 ${money(item.current_cents)}，对比期 ${money(item.compare_cents)}`,class:'plot-point'});
+      node(group,'rect',{x:0,y,width,height:46,class:'plot-hit'});
+      node(group,'text',{x:0,y:y+18,class:'chart-label'},item.category_name);
+      node(group,'rect',{x:value<0n?center-length:center,y,width:Math.max(1,length),height:22,rx:3,class:`plot-fill series-${value<0n?'green':'sand'}`});
+      node(group,'text',{x:center+(value<0n?-5:5),y:y+38,'text-anchor':value<0n?'end':'start',class:'chart-label'},`${value>0n?'+':''}${money(value)}`);
+      group.addEventListener('click',()=>onSelect(item));group.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();onSelect(item);}});
+    });
+  }
+  return {draw, horizontal, money};
 })();

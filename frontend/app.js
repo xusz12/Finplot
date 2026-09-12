@@ -108,6 +108,12 @@ const decimalMoney = value => {
   const cents = BigInt(whole) + ((fraction[0] || '0') >= '5' ? (negative ? -1n : 1n) : 0n);
   return money(cents);
 };
+const ratioMoney = (numerator, denominator, fallback) => {
+  if (numerator == null || denominator == null) return decimalMoney(fallback);
+  const n=BigInt(numerator), d=BigInt(denominator); if(d<=0n)return '—';
+  const a=n<0n?-n:n, rounded=(a*2n+d)/(d*2n);
+  return money(n<0n?-rounded:rounded);
+};
 const previousDate = end => {
   if (!end) return null;
   const d = new Date(`${end}T00:00:00Z`); d.setUTCDate(d.getUTCDate() - 1); return d.toISOString().slice(0,10);
@@ -214,7 +220,7 @@ function renderRanks(data) {
       },'rank-row');
       const head=add(button,'strong');add(head,'span',item.category_name);add(head,'span',money(item.amount_cents));
       const share=BigInt(view.total_cents)?`${Number(BigInt(item.amount_cents)*1000n/BigInt(view.total_cents))/10}%`:'—';
-      add(button,'small',`${share} · ${item.transaction_count} 笔 · 均笔 ${item.transaction_count?decimalMoney(item.average_cents??String(BigInt(item.amount_cents)/BigInt(item.transaction_count))):'—'}${!state.group&&!item.is_other?' · 查看分类组':''}`);
+      add(button,'small',`${share} · ${item.transaction_count} 笔 · 均笔 ${item.transaction_count?ratioMoney(item.amount_cents,item.transaction_count,item.average_cents):'—'}${!state.group&&!item.is_other?' · 查看分类组':''}`);
       const meter=add(button,'progress');meter.className='rank-meter';meter.max=10000;meter.value=Number(BigInt(item.amount_cents)*10000n/max);meter.setAttribute('aria-label',`${item.category_name} ${share}`);
     };
     sorted.slice(0,limit).forEach(showRow);
@@ -229,10 +235,10 @@ function renderChanges(data) {
   if(!items.length){add(parent,'p','两期均无匹配分类。');return;}
   const points=items.map(c=>({label:c.category_name,range:`本期 ${money(c.current_cents)} / 对比期 ${money(c.compare_cents)}`,delta:c.delta_cents,item:c}));
   const graph=add(parent,'div');graph.id='change-chart';
-  draw('change-chart',points,[{key:'delta',label:'金额变化',color:'blue'}],'分类金额增减',(p)=>showChange(p.item,'current'));
+  LedgerCharts.horizontal(graph,items,c=>showChange(c,'current'));
   for(const c of items){
     const row=add(parent,'div');row.className='change-row';add(row,'strong',`${c.category_name} · ${comparisonText(c.current_cents,c.compare_cents)}`);
-    add(row,'p',`交易频次 ${c.current_transaction_count} / ${c.compare_transaction_count} 笔；均笔 ${decimalMoney(c.current_average_cents)} / ${decimalMoney(c.compare_average_cents)}`);
+    add(row,'p',`交易频次 ${c.current_transaction_count} / ${c.compare_transaction_count} 笔；均笔 ${ratioMoney(c.current_cents,c.current_transaction_count,c.current_average_cents)} / ${ratioMoney(c.compare_cents,c.compare_transaction_count,c.compare_average_cents)}`);
     action(row,`本期 ${money(c.current_cents)}`,()=>showChange(c,'current'));action(row,`对比期 ${money(c.compare_cents)}`,()=>showChange(c,'compare'));
   }
 }
@@ -246,8 +252,8 @@ function renderDaily(data){
   for(const item of data.nature_breakdown){const b=action(nature,item.nature,()=>{$('#nature').value=item.nature;resetSelection();load();});add(b,'strong',`盈余 ${money(item.balance_cents)}`);add(b,'small',`收入 ${money(item.income_cents)} / 支出 ${money(item.expense_cents)}`);add(b,'small',`${item.transaction_count} 笔`);}
   const parent=$('#daily-stats');parent.replaceChildren();const daily=data.nature_breakdown.find(n=>n.nature==='日常'), ref=data.three_month_reference;
   stat(parent,'日常结余率',percent(daily?.balance_rate),'日常盈余 ÷ 日常收入');
-  stat(parent,'本期日均支出',decimalMoney(data.daily_expense.daily_expense_cents),`${data.daily_expense.effective_days} 个自然日 · 不随无记录日缩短`);
-  if(ref){stat(parent,'近3个月参照 / 日',decimalMoney(ref.daily_expense_cents),`${rangeText(ref)} · ${ref.natural_days} 天`);stat(parent,'近3个月月均',decimalMoney(ref.monthly_average_expense_cents),`${ref.coverage?.message||'按已记录账单计算'} · 边界覆盖 ${ref.coverage?.covered_days??'—'} 天`);}
+  stat(parent,'本期日均支出',ratioMoney(data.daily_expense.expense_cents,data.daily_expense.effective_days,data.daily_expense.daily_expense_cents),`${data.daily_expense.effective_days} 个自然日 · 不随无记录日缩短`);
+  if(ref){stat(parent,'近3个月参照 / 日',ratioMoney(ref.expense_cents,ref.natural_days,ref.daily_expense_cents),`${rangeText(ref)} · ${ref.natural_days} 天`);stat(parent,'近3个月月均',ratioMoney(ref.expense_cents,3,ref.monthly_average_expense_cents),`${ref.coverage?.message||'按已记录账单计算'} · 边界覆盖 ${ref.coverage?.covered_days??'—'} 天`);}
   const inv=$('#investment-stats');inv.replaceChildren();const investment=data.investment;
   stat(inv,'已实现收益',money(investment.gain_cents),`${investment.transaction_count} 笔投资交易`);stat(inv,'已实现亏损',money(investment.loss_cents),'亏损以支出记录');stat(inv,'净损益',money(investment.net_cents),'已实现收益 − 已实现亏损');
   // Percentage charts use scaled thousandths of a percentage point, with custom labels below.
@@ -297,7 +303,8 @@ async function load({append=false,detailOnly=false,refresh=false,retry=0}={}){
   try{
     const data=detailOnly&&state.data?state.data:await get(`/api/analytics?${query()}`,signal);
     const detail=state.detail;
-    const detailData=data.scope.start&&data.scope.end_exclusive?await get(`/api/dashboard?${detailQuery(data,detail,append?state.cursor:null)}`,signal):null;
+    const conflict=['nature','direction'].some(key=>detail?.[key]&&$('#'+key).value&&detail[key]!==$('#'+key).value);
+    const detailData=conflict?{version:data.version,transactions:[],filtered_count:0,categories:[],next_cursor:null}:data.scope.start&&data.scope.end_exclusive?await get(`/api/dashboard?${detailQuery(data,detail,append?state.cursor:null)}`,signal):null;
     if(mine!==state.serial)return;
     if(detailData&&detailData.version!==data.version){const error=new Error('数据版本变化');error.status=409;throw error;}
     document.querySelector('main').classList.remove('data-stale');state.data=data;state.version=data.version;state.lastSync=Date.now();
