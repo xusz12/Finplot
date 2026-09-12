@@ -493,7 +493,22 @@ def _prior_range(kind: str, current_start: date, current_end: date,
 
 
 def _year_ago_range(current_start: date, current_end: date) -> tuple[date, date]:
-    return _shift_year(current_start, -1), _shift_year(current_end, -1)
+    """Map a half-open range by calendar date, clipping leap day safely.
+
+    `current_end` is exclusive. Shifting it directly can collapse a one-day
+    2024-02-28 range to an empty 2023-02-28 range. Map the last included
+    calendar day first, then reconstruct the exclusive boundary. This keeps
+    2/28 and 2/29 as visible one-day comparisons and maps a complete leap
+    February to the complete non-leap February.
+    """
+    if current_start >= current_end:
+        raise HTTPException(422, "comparison range must not be empty")
+    previous_start = _shift_year(current_start, -1)
+    previous_last = _shift_year(current_end - timedelta(days=1), -1)
+    previous_end = previous_last + timedelta(days=1)
+    if previous_end <= previous_start:
+        raise HTTPException(422, "comparison range is out of calendar bounds")
+    return previous_start, previous_end
 
 
 def _period_anchor(value: date, grain: str) -> date:

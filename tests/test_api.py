@@ -1,7 +1,9 @@
 import os
 import tempfile
 import unittest
+from datetime import date
 from pathlib import Path
+from unittest.mock import patch
 
 from fastapi.testclient import TestClient
 from make_fixture import make
@@ -159,6 +161,36 @@ class ObservatoryApiTests(unittest.TestCase):
         self.assertEqual(self.get("/api/analytics", params={
             "kind": "month", "value": "2026-08", "compare": "custom",
         }).status_code, 422)
+
+    def test_analytics_year_ago_maps_leap_day_and_exclusive_end(self):
+        cases = [
+            ("2024-02-28", "2024-02-28", "2023-02-28", "2023-03-01", 1),
+            ("2024-02-29", "2024-02-29", "2023-02-28", "2023-03-01", 1),
+            ("2024-02-01", "2024-02-29", "2023-02-01", "2023-03-01", 28),
+        ]
+        for current_start, current_end, compare_start, compare_end, days in cases:
+            with self.subTest(current_start=current_start, current_end=current_end):
+                body = self.get("/api/analytics", params={
+                    "kind": "custom", "start": current_start, "end": current_end,
+                    "compare": "year_ago", "period_mode": "full", "grain": "day",
+                }).json()
+                self.assertEqual(body["comparison"]["compare"]["start"], compare_start)
+                self.assertEqual(body["comparison"]["compare"]["end_exclusive"], compare_end)
+                self.assertEqual(body["comparison"]["compare"]["days"], days)
+
+    def test_analytics_elapsed_and_full_current_period_have_distinct_year_ago_ranges(self):
+        query = {
+            "kind": "month", "value": "2026-09", "compare": "year_ago", "grain": "month",
+        }
+        with patch("backend.app.main._analytics_today", return_value=date(2026, 9, 12)):
+            elapsed = self.get("/api/analytics", params={**query, "period_mode": "elapsed"}).json()
+            full = self.get("/api/analytics", params={**query, "period_mode": "full"}).json()
+        self.assertEqual(elapsed["scope"]["end_exclusive"], "2026-09-13")
+        self.assertEqual(elapsed["comparison"]["compare"]["start"], "2025-09-01")
+        self.assertEqual(elapsed["comparison"]["compare"]["end_exclusive"], "2025-09-13")
+        self.assertEqual(full["scope"]["end_exclusive"], "2026-10-01")
+        self.assertEqual(full["comparison"]["compare"]["start"], "2025-09-01")
+        self.assertEqual(full["comparison"]["compare"]["end_exclusive"], "2025-10-01")
         self.assertEqual(self.get("/api/analytics", params={
             "kind": "month", "value": "2026-08", "compare": "none",
             "compare_start": "2026-01-01", "compare_end": "2026-01-02",
