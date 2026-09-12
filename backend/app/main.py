@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import base64
 import binascii
+import calendar
 import hashlib
 import json
 import os
@@ -11,8 +12,10 @@ import sqlite3
 import uuid
 from contextlib import contextmanager
 from datetime import date, datetime, timedelta, timezone
+from decimal import Decimal, ROUND_HALF_UP
 from pathlib import Path
 from urllib.parse import quote, urlsplit
+from zoneinfo import ZoneInfo
 
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -25,7 +28,11 @@ MAX_FILTER_TEXT = 128
 INSTANCE_ID = uuid.uuid4().hex
 ALLOWED_NATURES = {"日常", "投资", "往来", "调整"}
 ALLOWED_DIRECTIONS = {"收入", "支出"}
+NATURE_ORDER = ("日常", "投资", "往来", "调整")
+GRAIN_VALUES = {"day", "month", "quarter", "half", "year"}
+COMPARE_VALUES = {"previous", "year_ago", "custom", "none"}
 LOOPBACK_HOSTS = {"127.0.0.1", "localhost", "::1"}
+SHANGHAI = ZoneInfo("Asia/Shanghai")
 
 
 def db_path() -> Path:
@@ -354,6 +361,798 @@ def dashboard(kind: str = "month", value: str | None = None, start: str | None =
             cutoff = conn.execute("SELECT min(occurred_at) first,max(occurred_at) last FROM transactions").fetchone()
             income, expense = int(totals['income']), int(totals['expense'])
             return {"version": current_version, "instance_id": INSTANCE_ID, "synced_at": checked_at(), "data_cutoff": cutoff['last'], "scope": {"kind":kind,"label":label,"start":start,"end_exclusive":end,"timezone":"Asia/Shanghai"}, "data_range":{"first":cutoff['first'],"last":cutoff['last']}, "filtered_count":int(totals['count']), "totals":{"income_cents":str(income),"expense_cents":str(expense),"balance_cents":str(income-expense),"income_yuan":money(income),"expense_yuan":money(expense),"balance_yuan":money(income-expense)}, "investment":{"filtered_count":int(investment['count']),"income_cents":str(investment['income']),"expense_cents":str(investment['expense']),"net_cents":str(int(investment['income'])-int(investment['expense']))}, "trend":[{"day":r['day'],"income_cents":str(r['income']),"expense_cents":str(r['expense'])} for r in trend], "groups":[{**dict(r),"cents":str(r['cents'])} for r in groups], "categories":[{**dict(r),"cents":str(r['cents'])} for r in categories], "transactions":[{**dict(r),"amount_cents":str(r['amount_cents']),"tags": [x for x in r['tags'].split(',') if x]} for r in page], "next_cursor":next_cursor, "page_limit":limit, "tags":[dict(r) for r in tag_rows]}
+    except sqlite3.Error as exc:
+        raise HTTPException(503, "ledger unavailable") from exc
+
+
+def _analytics_today() -> date:
+    return datetime.now(SHANGHAI).date()
+
+
+def _date_value(value: str | None) -> date | None:
+    return date.fromisoformat(value[:10]) if value else None
+
+
+def _date_text(value: date | None) -> str | None:
+    return value.isoformat() if value else None
+
+
+def _next_month_date(value: date) -> date:
+    return next_month(value.year, value.month)
+
+
+def _shift_months(value: date, months: int) -> date:
+    index = value.year * 12 + value.month - 1 + months
+    year, month_index = divmod(index, 12)
+    month = month_index + 1
+    if year < 1 or year > 9999:
+        raise HTTPException(422, "calendar scope is out of range")
+    day = min(value.day, calendar.monthrange(year, month)[1])
+    return date(year, month, day)
+
+
+def _shift_year(value: date, years: int) -> date:
+    year = value.year + years
+    if year < 1 or year > 9999:
+        raise HTTPException(422, "calendar scope is out of range")
+    return value.replace(year=year, day=min(value.day, calendar.monthrange(year, value.month)[1]))
+
+
+def _decimal_value(numerator: int, denominator: int, places: str = "0.0001") -> str | None:
+    if denominator == 0:
+        return None
+    value = (Decimal(numerator) / Decimal(denominator)).quantize(Decimal(places), rounding=ROUND_HALF_UP)
+    return format(value, "f")
+
+
+def _ratio(numerator: int, denominator: int) -> tuple[float | None, str | None]:
+    if denominator <= 0:
+        return None, "no_base"
+    return round(numerator / denominator, 6), None
+
+
+def _analytics_range(start: date | None, end: date | None, label: str,
+                     requested_start: date | None = None,
+                     requested_end: date | None = None,
+                     partial: bool = False) -> dict:
+    days = (end - start).days if start and end else 0
+    return {
+        "label": label,
+        "start": _date_text(start),
+        "end": _date_text(end - timedelta(days=1)) if start and end and end > start else None,
+        "end_exclusive": _date_text(end),
+        "days": max(0, days),
+        "requested_start": _date_text(requested_start if requested_start is not None else start),
+        "requested_end_exclusive": _date_text(requested_end if requested_end is not None else end),
+        "is_partial": bool(partial),
+        "timezone": "Asia/Shanghai",
+    }
+
+
+def _scope_dates(kind: str, value: str | None, start: str | None, end: str | None) -> tuple[date | None, date | None, str]:
+    first, following, label = scope(kind, value, start, end)
+    return _date_value(first), _date_value(following), label
+
+
+def _effective_current_range(kind: str, value: str | None, start: str | None, end: str | None,
+                             period_mode: str, data_first: date | None, data_last: date | None,
+                             today: date) -> tuple[dict, date | None, date | None, date | None, date | None]:
+    requested_start, requested_end, label = _scope_dates(kind, value, start, end)
+    if requested_start is None:
+        # “全部” has a concrete chart interval so that its daily denominator,
+        # calendar and long-range series remain reproducible. An empty ledger
+        # intentionally remains an empty range.
+        actual_start = data_first
+        actual_end = data_last + timedelta(days=1) if data_last else None
+    else:
+        actual_start, actual_end = requested_start, requested_end
+    partial = False
+    if (period_mode == "elapsed" and actual_start and actual_end and
+            actual_start <= today < actual_end and actual_end > today + timedelta(days=1)):
+        actual_end = today + timedelta(days=1)
+        partial = True
+    current = _analytics_range(actual_start, actual_end, label, requested_start, requested_end, partial)
+    return current, requested_start, requested_end, actual_start, actual_end
+
+
+def _prior_range(kind: str, current_start: date, current_end: date,
+                 requested_start: date | None, requested_end: date | None,
+                 period_mode: str) -> tuple[date, date]:
+    length = max(1, (current_end - current_start).days)
+    if kind == "day":
+        return current_start - timedelta(days=1), current_start
+    if kind == "custom":
+        return current_start - timedelta(days=length), current_start
+    if kind == "month":
+        anchor = current_start.replace(day=1)
+        previous = _shift_months(anchor, -1)
+        if period_mode == "elapsed" and requested_end and current_end < requested_end:
+            return previous, min(previous + timedelta(days=length), anchor)
+        return previous, anchor
+    if kind == "quarter":
+        month = ((current_start.month - 1) // 3) * 3 + 1
+        anchor = date(current_start.year, month, 1)
+        previous = _shift_months(anchor, -3)
+        if period_mode == "elapsed" and requested_end and current_end < requested_end:
+            return previous, min(previous + timedelta(days=length), anchor)
+        return previous, anchor
+    if kind == "half":
+        month = 1 if current_start.month <= 6 else 7
+        anchor = date(current_start.year, month, 1)
+        previous = _shift_months(anchor, -6)
+        if period_mode == "elapsed" and requested_end and current_end < requested_end:
+            return previous, min(previous + timedelta(days=length), anchor)
+        return previous, anchor
+    if kind == "year":
+        anchor = date(current_start.year, 1, 1)
+        previous = date(current_start.year - 1, 1, 1)
+        if period_mode == "elapsed" and requested_end and current_end < requested_end:
+            return previous, min(previous + timedelta(days=length), anchor)
+        return previous, anchor
+    raise HTTPException(422, "unknown scope")
+
+
+def _year_ago_range(current_start: date, current_end: date) -> tuple[date, date]:
+    return _shift_year(current_start, -1), _shift_year(current_end, -1)
+
+
+def _period_anchor(value: date, grain: str) -> date:
+    if grain == "day":
+        return value
+    if grain == "month":
+        return value.replace(day=1)
+    if grain == "quarter":
+        return date(value.year, ((value.month - 1) // 3) * 3 + 1, 1)
+    if grain == "half":
+        return date(value.year, 1 if value.month <= 6 else 7, 1)
+    if grain == "year":
+        return date(value.year, 1, 1)
+    raise HTTPException(422, "grain must be day, month, quarter, half or year")
+
+
+def _next_grain(value: date, grain: str) -> date:
+    if grain == "day":
+        return value + timedelta(days=1)
+    if grain == "month":
+        return _next_month_date(value)
+    if grain == "quarter":
+        return _shift_months(value, 3)
+    if grain == "half":
+        return _shift_months(value, 6)
+    if grain == "year":
+        return date(value.year + 1, 1, 1)
+    raise HTTPException(422, "grain must be day, month, quarter, half or year")
+
+
+def _grain_label(value: date, grain: str) -> str:
+    if grain == "day":
+        return value.isoformat()
+    if grain == "month":
+        return value.strftime("%Y-%m")
+    if grain == "quarter":
+        return f"{value.year:04d}-Q{((value.month - 1) // 3) + 1}"
+    if grain == "half":
+        return f"{value.year:04d}-H{1 if value.month <= 6 else 2}"
+    return f"{value.year:04d}"
+
+
+def _grain_buckets(start: date | None, end: date | None, grain: str) -> list[dict]:
+    if not start or not end or start >= end:
+        return []
+    cursor = _period_anchor(start, grain)
+    buckets = []
+    while cursor < end:
+        following = _next_grain(cursor, grain)
+        bucket_start, bucket_end = max(start, cursor), min(end, following)
+        if bucket_start < bucket_end:
+            buckets.append({
+                "key": _grain_label(cursor, grain),
+                "label": _grain_label(cursor, grain),
+                "natural_start": cursor.isoformat(),
+                "natural_end_exclusive": following.isoformat(),
+                "start": bucket_start.isoformat(),
+                "end_exclusive": bucket_end.isoformat(),
+                "days": (bucket_end - bucket_start).days,
+            })
+        cursor = following
+    return buckets
+
+
+def _analytics_rows(conn: sqlite3.Connection, start: date | None, end: date | None,
+                    tags: list[str], tag_mode: str, nature: str | None,
+                    direction: str | None, group_code: str | None,
+                    category_code: str | None) -> list[dict]:
+    where, params = filters(_date_text(start), _date_text(end), tags, tag_mode,
+                            nature, direction, group_code, category_code)
+    sql = ("SELECT t.id,t.occurred_at,t.direction,t.amount_cents,"
+           "g.code group_code,g.name group_name,c.code category_code,"
+           "c.name category_name,c.nature "
+           "FROM transactions t JOIN categories c ON c.id=t.category_id "
+           "JOIN category_groups g ON g.id=c.group_id" + where +
+           " ORDER BY t.occurred_at,t.id")
+    return [dict(row) for row in conn.execute(sql, params).fetchall()]
+
+
+def _nature_empty() -> dict:
+    return {nature: {"income": 0, "expense": 0, "count": 0} for nature in NATURE_ORDER}
+
+
+def _summary(rows: list[dict]) -> dict:
+    income = sum(int(row["amount_cents"]) for row in rows if row["direction"] == "收入")
+    expense = sum(int(row["amount_cents"]) for row in rows if row["direction"] == "支出")
+    nature = _nature_empty()
+    for row in rows:
+        item = nature[row["nature"]]
+        item["count"] += 1
+        item["income" if row["direction"] == "收入" else "expense"] += int(row["amount_cents"])
+
+    def nature_item(name: str, item: dict) -> dict:
+        balance = item["income"] - item["expense"]
+        rate, reason = _ratio(balance, item["income"])
+        return {
+            "nature": name,
+            "transaction_count": item["count"],
+            "income_cents": str(item["income"]),
+            "expense_cents": str(item["expense"]),
+            "balance_cents": str(balance),
+            "balance_yuan": money(balance),
+            "balance_rate": rate,
+            "balance_rate_reason": reason,
+        }
+
+    investment = nature["投资"]
+    investment_net = investment["income"] - investment["expense"]
+    return {
+        "transaction_count": len(rows),
+        "income_count": sum(1 for row in rows if row["direction"] == "收入"),
+        "expense_count": sum(1 for row in rows if row["direction"] == "支出"),
+        "income_cents": str(income),
+        "expense_cents": str(expense),
+        "balance_cents": str(income - expense),
+        "income_yuan": money(income),
+        "expense_yuan": money(expense),
+        "balance_yuan": money(income - expense),
+        "nature": [nature_item(name, nature[name]) for name in NATURE_ORDER],
+        "investment": {
+            "transaction_count": investment["count"],
+            "gain_cents": str(investment["income"]),
+            "loss_cents": str(investment["expense"]),
+            "net_cents": str(investment_net),
+            "gain_yuan": money(investment["income"]),
+            "loss_yuan": money(investment["expense"]),
+            "net_yuan": money(investment_net),
+        },
+    }
+
+
+def _category_record(direction: str, code: str, name: str, group_code: str,
+                     group_name: str, amount: int, count: int,
+                     total: int, other: bool = False) -> dict:
+    share, reason = _ratio(amount, total)
+    average = _decimal_value(amount, count)
+    return {
+        "direction": direction,
+        "category_code": code,
+        "category_name": name,
+        "group_code": group_code,
+        "group_name": group_name,
+        "amount_cents": str(amount),
+        "amount_yuan": money(amount),
+        "transaction_count": count,
+        "average_cents": average,
+        "average_yuan": _decimal_value(amount, count * 100, "0.0001") if count else None,
+        "share": share,
+        "share_reason": reason,
+        "is_other": other,
+    }
+
+
+def _category_views(current_rows: list[dict], compare_rows: list[dict] | None,
+                    top_n: int) -> tuple[dict, list[dict]]:
+    def collect(rows: list[dict]) -> dict:
+        result = {}
+        for row in rows:
+            key = (row["direction"], row["category_code"])
+            item = result.setdefault(key, {
+                "direction": row["direction"], "category_code": row["category_code"],
+                "category_name": row["category_name"], "group_code": row["group_code"],
+                "group_name": row["group_name"], "amount": 0, "count": 0,
+            })
+            item["amount"] += int(row["amount_cents"])
+            item["count"] += 1
+        return result
+
+    current = collect(current_rows)
+    view = {}
+    for direction in ("收入", "支出"):
+        all_items = [item for item in current.values() if item["direction"] == direction]
+        all_items.sort(key=lambda item: (-item["amount"], item["category_code"]))
+        total = sum(item["amount"] for item in all_items)
+        selected = all_items if top_n == 0 else all_items[:top_n]
+        items = [_category_record(direction, item["category_code"], item["category_name"],
+                                  item["group_code"], item["group_name"], item["amount"],
+                                  item["count"], total) for item in selected]
+        other_amount = sum(item["amount"] for item in all_items[len(selected):])
+        other_count = sum(item["count"] for item in all_items[len(selected):])
+        other = _category_record(direction, "__other__", "其他", "__other__", "其他",
+                                 other_amount, other_count, total, True)
+        view["income" if direction == "收入" else "expense"] = {
+            "direction": direction,
+            "total_cents": str(total),
+            "transaction_count": sum(item["count"] for item in all_items),
+            "top_n": "all" if top_n == 0 else top_n,
+            "items": items,
+            "other": other,
+        }
+
+    compare_map = collect(compare_rows or [])
+    changes = []
+    keys = sorted(set(current) | set(compare_map), key=lambda key: (key[0], key[1]))
+    for key in keys:
+        cur = current.get(key, {})
+        old = compare_map.get(key, {})
+        amount = int(cur.get("amount", 0))
+        prior = int(old.get("amount", 0))
+        delta = amount - prior
+        change_ratio, reason = _ratio(delta, prior)
+        changes.append({
+            "direction": key[0],
+            "category_code": key[1],
+            "category_name": cur.get("category_name", old.get("category_name")),
+            "group_code": cur.get("group_code", old.get("group_code")),
+            "group_name": cur.get("group_name", old.get("group_name")),
+            "current_cents": str(amount),
+            "compare_cents": str(prior),
+            "delta_cents": str(delta),
+            "current_transaction_count": int(cur.get("count", 0)),
+            "compare_transaction_count": int(old.get("count", 0)),
+            "current_average_cents": _decimal_value(amount, int(cur.get("count", 0))),
+            "compare_average_cents": _decimal_value(prior, int(old.get("count", 0))),
+            "change_ratio": change_ratio,
+            "change_ratio_reason": reason,
+        })
+    changes.sort(key=lambda item: (-abs(int(item["delta_cents"])), item["direction"], item["category_code"]))
+    return view, changes
+
+
+def _summary_delta(current: dict, compare: dict | None) -> dict | None:
+    if compare is None:
+        return None
+    result = {}
+    for field in ("income_cents", "expense_cents", "balance_cents", "transaction_count"):
+        current_value = int(current[field]) if field.endswith("cents") else int(current[field])
+        compare_value = int(compare[field]) if field.endswith("cents") else int(compare[field])
+        delta = current_value - compare_value
+        result[field] = {
+            "current": str(current_value) if field.endswith("cents") else current_value,
+            "compare": str(compare_value) if field.endswith("cents") else compare_value,
+            "delta_cents": str(delta) if field.endswith("cents") else None,
+            "delta": delta,
+        }
+        if field.endswith("cents"):
+            ratio, reason = _ratio(delta, compare_value)
+            result[field]["change_ratio"] = ratio
+            result[field]["change_ratio_reason"] = reason
+    return result
+
+
+def _period_summary_item(bucket: dict, rows: list[dict], today: date,
+                         cumulative: int) -> tuple[dict, int]:
+    start, end = date.fromisoformat(bucket["start"]), date.fromisoformat(bucket["end_exclusive"])
+    period_rows = [row for row in rows if start <= _date_value(row["occurred_at"]) < end]
+    future = start > today
+    item = {
+        **bucket,
+        "is_future": future,
+        "is_partial": bucket["start"] != bucket["natural_start"] or bucket["end_exclusive"] != bucket["natural_end_exclusive"],
+    }
+    if future:
+        for field in ("transaction_count", "income_cents", "expense_cents", "balance_cents",
+                      "income_yuan", "expense_yuan", "balance_yuan", "cumulative_balance_cents",
+                      "nature", "investment"):
+            item[field] = None
+        return item, cumulative
+    summary = _summary(period_rows)
+    cumulative += int(summary["balance_cents"])
+    item.update({
+        "transaction_count": summary["transaction_count"],
+        "income_cents": summary["income_cents"],
+        "expense_cents": summary["expense_cents"],
+        "balance_cents": summary["balance_cents"],
+        "income_yuan": summary["income_yuan"],
+        "expense_yuan": summary["expense_yuan"],
+        "balance_yuan": summary["balance_yuan"],
+        "cumulative_balance_cents": str(cumulative),
+        "nature": summary["nature"],
+        "investment": summary["investment"],
+    })
+    return item, cumulative
+
+
+def _trend(conn: sqlite3.Connection, current_start: date | None, current_end: date | None,
+           compare_start: date | None, compare_end: date | None, grain: str,
+           current_rows: list[dict], compare_rows: list[dict] | None, today: date) -> dict:
+    def series(start: date | None, end: date | None, rows: list[dict] | None) -> list[dict]:
+        cumulative = 0
+        output = []
+        for bucket in _grain_buckets(start, end, grain):
+            item, cumulative = _period_summary_item(bucket, rows or [], today, cumulative)
+            output.append(item)
+        return output
+
+    current = series(current_start, current_end, current_rows)
+    compare = series(compare_start, compare_end, compare_rows) if compare_start and compare_end else []
+    aligned = []
+    for index in range(max(len(current), len(compare))):
+        aligned.append({"index": index, "current": current[index] if index < len(current) else None,
+                        "compare": compare[index] if index < len(compare) else None})
+    return {
+        "grain": grain,
+        "current": current,
+        "compare": compare,
+        "aligned": aligned,
+        "cumulative_basis": "selected current range start",
+    }
+
+
+def _daily_metrics(current: dict, start: date | None, end: date | None) -> dict:
+    days = (end - start).days if start and end else 0
+    expense = int(current["expense_cents"])
+    return {
+        "start": _date_text(start),
+        "end_exclusive": _date_text(end),
+        "effective_days": days,
+        "denominator": "calendar_days",
+        "expense_cents": str(expense),
+        "daily_expense_cents": _decimal_value(expense, days),
+        "daily_expense_yuan": _decimal_value(expense, days * 100) if days else None,
+    }
+
+
+def _coverage(data_first: date | None, data_last: date | None,
+              start: date | None, end: date | None) -> dict:
+    if not start or not end:
+        return {"complete": False, "warning": "no_range", "covered_days": 0, "range_days": 0}
+    range_days = max(0, (end - start).days)
+    if not data_first or not data_last:
+        return {
+            "complete": False,
+            "warning": "no_ledger_rows",
+            "covered_days": 0,
+            "range_days": range_days,
+            "message": "按已记录账单计算；账本没有可核对的记录",
+        }
+    ledger_end = data_last + timedelta(days=1)
+    overlap_start, overlap_end = max(start, data_first), min(end, ledger_end)
+    covered_days = max(0, (overlap_end - overlap_start).days)
+    boundary_gap = data_first > start or ledger_end < end
+    return {
+        "complete": not boundary_gap,
+        "warning": "ledger_boundary_outside_range" if boundary_gap else None,
+        "covered_days": covered_days,
+        "range_days": range_days,
+        "first_record_date": data_first.isoformat(),
+        "last_record_date": data_last.isoformat(),
+        "message": ("按已记录账单计算；账本数据未覆盖参照期完整边界" if boundary_gap
+                    else "按已记录账单计算；仅以账本边界核对覆盖范围"),
+    }
+
+
+def _three_month_reference(conn: sqlite3.Connection, anchor: date | None,
+                           tags: list[str], tag_mode: str, nature: str | None,
+                           direction: str | None, group_code: str | None,
+                           category_code: str | None, data_first: date | None,
+                           data_last: date | None) -> dict | None:
+    if not anchor:
+        return None
+    month = anchor.replace(day=1)
+    start, end = _shift_months(month, -3), month
+    rows = _analytics_rows(conn, start, end, tags, tag_mode, nature, direction, group_code, category_code)
+    expense = sum(int(row["amount_cents"]) for row in rows if row["direction"] == "支出")
+    days = (end - start).days
+    return {
+        "start": start.isoformat(),
+        "end_exclusive": end.isoformat(),
+        "months": 3,
+        "natural_days": days,
+        "expense_cents": str(expense),
+        "expense_yuan": money(expense),
+        "daily_expense_cents": _decimal_value(expense, days),
+        "daily_expense_yuan": _decimal_value(expense, days * 100),
+        "monthly_average_expense_cents": _decimal_value(expense, 3),
+        "monthly_average_expense_yuan": _decimal_value(expense, 300),
+        "coverage": _coverage(data_first, data_last, start, end),
+        "denominator": "weighted_calendar_days",
+    }
+
+
+def _long_overview(conn: sqlite3.Connection, anchor: date | None, current_end: date | None,
+                   tags: list[str], tag_mode: str, nature: str | None,
+                   direction: str | None, group_code: str | None,
+                   category_code: str | None, today: date) -> dict | None:
+    if not anchor:
+        return None
+    selected_month = anchor.replace(day=1)
+    first_month = _shift_months(selected_month, -11)
+    end = _next_month_date(selected_month)
+    all_rows = _analytics_rows(conn, first_month, end, tags, tag_mode, nature,
+                               direction, group_code, category_code)
+    output = []
+    cursor = first_month
+    while cursor < end:
+        following = _next_month_date(cursor)
+        effective_end = following
+        is_current = cursor.year == today.year and cursor.month == today.month
+        partial = False
+        if is_current and current_end and current_end < following:
+            effective_end = max(cursor, current_end)
+            partial = True
+        month_rows = [row for row in all_rows
+                      if cursor <= _date_value(row["occurred_at"]) < effective_end]
+        future = cursor > today
+        item = {
+            "month": cursor.strftime("%Y-%m"),
+            "start": cursor.isoformat(),
+            "end_exclusive": following.isoformat(),
+            "display_end_exclusive": effective_end.isoformat(),
+            "days": (following - cursor).days,
+            "display_days": (effective_end - cursor).days,
+            "is_current_month": is_current,
+            "is_partial": partial,
+            "is_future": future,
+        }
+        if future:
+            for field in ("transaction_count", "income_cents", "expense_cents", "balance_cents",
+                          "income_yuan", "expense_yuan", "balance_yuan"):
+                item[field] = None
+        else:
+            item.update(_summary(month_rows))
+        output.append(item)
+        cursor = following
+    return {
+        "anchor_month": selected_month.strftime("%Y-%m"),
+        "start": first_month.isoformat(),
+        "end_exclusive": end.isoformat(),
+        "months": output,
+        "note": "当前未结束月份以实际已读取日期标记为部分月份；其余月份为完整自然月范围",
+    }
+
+
+def _calendar_view(current_start: date | None, current_end: date | None,
+                   current_rows: list[dict], today: date) -> dict:
+    anchor = (current_start or today).replace(day=1)
+    following = _next_month_date(anchor)
+    by_day = {}
+    for row in current_rows:
+        day = _date_value(row["occurred_at"])
+        item = by_day.setdefault(day, {"expense": 0, "count": 0})
+        if row["direction"] == "支出":
+            item["expense"] += int(row["amount_cents"])
+        item["count"] += 1
+    days = []
+    for offset in range((following - anchor).days):
+        day = anchor + timedelta(days=offset)
+        in_scope = bool(current_start and current_end and current_start <= day < current_end)
+        future = day > today
+        item = by_day.get(day, {"expense": 0, "count": 0})
+        days.append({
+            "date": day.isoformat(),
+            "weekday": day.weekday(),
+            "in_scope": in_scope,
+            "is_future": future,
+            "expense_cents": str(item["expense"]) if in_scope and not future else None,
+            "expense_yuan": money(item["expense"]) if in_scope and not future else None,
+            "transaction_count": item["count"] if in_scope and not future else None,
+            "empty_label": "无记录" if in_scope and not future and item["count"] == 0 else None,
+        })
+    total = sum(int(item["expense_cents"]) for item in days if item["expense_cents"] is not None)
+    return {
+        "month": anchor.strftime("%Y-%m"),
+        "start": anchor.isoformat(),
+        "end_exclusive": following.isoformat(),
+        "days": days,
+        "total_expense_cents": str(total),
+        "total_expense_yuan": money(total),
+        "note": "按上海自然日；未来日期和范围外日期独立标记，不填充为零",
+    }
+
+
+def _comparison_range(kind: str, compare: str, current_start: date | None,
+                      current_end: date | None, requested_start: date | None,
+                      requested_end: date | None, period_mode: str,
+                      compare_start: str | None, compare_end: str | None) -> tuple[date | None, date | None, str | None, str | None]:
+    if compare == "none":
+        if compare_start or compare_end:
+            raise HTTPException(422, "compare_start and compare_end require compare=custom")
+        return None, None, None, "disabled"
+    if compare == "custom":
+        if not compare_start or not compare_end:
+            raise HTTPException(422, "custom comparison requires compare_start and compare_end")
+        first, last = parse_day(compare_start), parse_day(compare_end)
+        if first > last:
+            raise HTTPException(422, "compare_start must not be later than compare_end")
+        return first, last + timedelta(days=1), f"{compare_start} 至 {compare_end}", None
+    if compare_start or compare_end:
+        raise HTTPException(422, "compare_start and compare_end require compare=custom")
+    if kind == "all":
+        return None, None, None, "all_scope_requires_custom_dates"
+    if not current_start or not current_end:
+        return None, None, None, "all_scope_requires_custom_dates"
+    if compare == "previous":
+        first, last = _prior_range(kind, current_start, current_end, requested_start, requested_end, period_mode)
+        return first, last, "上一期", None
+    if compare == "year_ago":
+        first, last = _year_ago_range(current_start, current_end)
+        return first, last, "去年同期", None
+    raise HTTPException(422, "compare must be previous, year_ago, custom or none")
+
+
+@app.get("/api/analytics")
+def analytics(kind: str = "month", value: str | None = None,
+              start: str | None = None, end: str | None = None,
+              tag: list[str] = Query(default=[]), tag_mode: str = "any",
+              nature: str | None = None, direction: str | None = None,
+              group: str | None = None, category: str | None = None,
+              compare: str = "previous", compare_start: str | None = None,
+              compare_end: str | None = None, period_mode: str = "elapsed",
+              grain: str | None = None, top_n: int = 10,
+              version: str | None = Query(default=None, alias="version"),
+              if_version: str | None = None):
+    """Return the complete v1.1 analysis in one read-only SQLite snapshot.
+
+    The response deliberately keeps the current and comparison intervals,
+    actual date boundaries and decimal-string money fields explicit. The
+    frontend can therefore use a chart point's real range when requesting
+    dashboard detail rows instead of guessing from a display label.
+    """
+    if tag_mode not in {"any", "all"}:
+        raise HTTPException(422, "tag_mode must be any or all")
+    if period_mode not in {"elapsed", "full"}:
+        raise HTTPException(422, "period_mode must be elapsed or full")
+    if compare not in COMPARE_VALUES:
+        raise HTTPException(422, "compare must be previous, year_ago, custom or none")
+    if grain is not None and grain not in GRAIN_VALUES:
+        raise HTTPException(422, "grain must be day, month, quarter, half or year")
+    if not 0 <= top_n <= 200:
+        raise HTTPException(422, "top_n must be 0..200")
+    if version and if_version and version != if_version:
+        raise HTTPException(422, "version and if_version must match")
+    tags = normalise_tags(tag)
+    group = validate_code(group, "group")
+    category = validate_code(category, "category")
+    # The product default is the current Shanghai month. Historical callers
+    # continue to get the explicitly supplied value, while an empty request is
+    # useful for the local page and deterministic in the deployed timezone.
+    today = _analytics_today()
+    if kind == "month" and value is None:
+        value = today.strftime("%Y-%m")
+    try:
+        path = db_path()
+    except RuntimeError as exc:
+        raise HTTPException(503, "ledger unavailable") from exc
+    try:
+        with readonly_connection(path) as conn:
+            require_schema(conn)
+            current_version = dataset_version(conn)
+            request_version = version or if_version
+            if request_version and request_version != current_version:
+                raise HTTPException(409, {"reason": "dataset_changed", "version": current_version})
+            cutoff = conn.execute("SELECT min(occurred_at) first,max(occurred_at) last FROM transactions").fetchone()
+            data_first = _date_value(cutoff["first"])
+            data_last = _date_value(cutoff["last"])
+            current_range, requested_start, requested_end, current_start, current_end = _effective_current_range(
+                kind, value, start, end, period_mode, data_first, data_last, today)
+            if grain is None:
+                span = (current_end - current_start).days if current_start and current_end else 0
+                grain = "day" if kind in {"day", "month"} or span <= 62 else "month"
+            compare_start_date, compare_end_date, compare_label, compare_reason = _comparison_range(
+                kind, compare, current_start, current_end, requested_start, requested_end,
+                period_mode, compare_start, compare_end)
+            current_rows = _analytics_rows(conn, current_start, current_end, tags, tag_mode,
+                                           nature, direction, group, category)
+            compare_rows = None
+            if compare_start_date and compare_end_date:
+                compare_rows = _analytics_rows(conn, compare_start_date, compare_end_date,
+                                               tags, tag_mode, nature, direction, group, category)
+            current_summary = _summary(current_rows)
+            compare_summary = _summary(compare_rows) if compare_rows is not None else None
+            category_view, category_changes = _category_views(current_rows, compare_rows, top_n)
+            if compare_rows is None:
+                category_changes = []
+            category_changes_by_direction = {
+                "income": [item for item in category_changes if item["direction"] == "收入"],
+                "expense": [item for item in category_changes if item["direction"] == "支出"],
+            }
+            trend = _trend(conn, current_start, current_end, compare_start_date,
+                           compare_end_date, grain, current_rows, compare_rows, today)
+            daily = _daily_metrics(current_summary, current_start, current_end)
+            three_month = _three_month_reference(
+                conn, current_start, tags, tag_mode, nature, direction, group, category,
+                data_first, data_last)
+            overview = _long_overview(
+                conn, current_start, current_end, tags, tag_mode, nature, direction,
+                group, category, today)
+            calendar_view = _calendar_view(current_start, current_end, current_rows, today)
+            current_range["coverage"] = _coverage(data_first, data_last, current_start, current_end)
+            compare_range = None
+            if compare_start_date and compare_end_date:
+                compare_range = _analytics_range(compare_start_date, compare_end_date,
+                                                 compare_label or "对比期", compare_start_date,
+                                                 compare_end_date, False)
+                compare_range["coverage"] = _coverage(data_first, data_last,
+                                                        compare_start_date, compare_end_date)
+            category_change_totals = {}
+            if compare_summary is not None:
+                for key, direction_name in (("income", "收入"), ("expense", "支出")):
+                    items = category_changes_by_direction[key]
+                    category_change_totals[key] = {
+                        "current_cents": str(int(current_summary["income_cents" if key == "income" else "expense_cents"])),
+                        "compare_cents": str(int(compare_summary["income_cents" if key == "income" else "expense_cents"])),
+                        "delta_cents": str(sum(int(item["delta_cents"]) for item in items)),
+                        "direction": direction_name,
+                    }
+            comparison = {
+                "requested_mode": compare,
+                "mode": compare if compare_range else "none",
+                "available": compare_range is not None,
+                "reason": compare_reason,
+                "same_snapshot": True,
+                "current": current_range,
+                "compare": compare_range,
+                "days_difference": ((current_end - current_start).days -
+                                    (compare_end_date - compare_start_date).days)
+                                   if current_start and current_end and compare_start_date and compare_end_date else None,
+            }
+            return {
+                "contract_version": "1.1",
+                "version": current_version,
+                "instance_id": INSTANCE_ID,
+                "synced_at": checked_at(),
+                "data_cutoff": cutoff["last"],
+                "data_range": {
+                    "first": cutoff["first"], "last": cutoff["last"],
+                    "first_date": _date_text(data_first), "last_date": _date_text(data_last),
+                },
+                "read_only": True,
+                "scope": current_range,
+                "filters": {
+                    "kind": kind, "value": value, "start": start, "end": end,
+                    "direction": direction, "nature": nature, "group": group,
+                    "category": category, "tags": tags, "tag_mode": tag_mode,
+                },
+                "comparison": comparison,
+                "summary": {
+                    "current": current_summary,
+                    "compare": compare_summary,
+                    "delta": _summary_delta(current_summary, compare_summary),
+                },
+                # These aliases make the contract convenient for the existing
+                # dashboard card renderer while summary remains the canonical
+                # v1.1 shape.
+                "filtered_count": current_summary["transaction_count"],
+                "totals": {
+                    "income_cents": current_summary["income_cents"],
+                    "expense_cents": current_summary["expense_cents"],
+                    "balance_cents": current_summary["balance_cents"],
+                    "income_yuan": current_summary["income_yuan"],
+                    "expense_yuan": current_summary["expense_yuan"],
+                    "balance_yuan": current_summary["balance_yuan"],
+                },
+                "investment": current_summary["investment"],
+                "nature_breakdown": current_summary["nature"],
+                "categories": category_view,
+                "category_changes": category_changes,
+                "category_changes_by_direction": category_changes_by_direction,
+                "category_change_totals": category_change_totals,
+                "trend": trend,
+                "periods": trend["current"],
+                "daily_expense": daily,
+                "three_month_reference": three_month,
+                "overview_12_months": overview,
+                "expense_calendar": calendar_view,
+                "tags": [dict(row) for row in conn.execute(
+                    "SELECT code,name FROM tags WHERE active=1 ORDER BY name").fetchall()],
+            }
     except sqlite3.Error as exc:
         raise HTTPException(503, "ledger unavailable") from exc
 
