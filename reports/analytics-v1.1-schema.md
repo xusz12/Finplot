@@ -29,9 +29,18 @@ dates with another compare mode returns 422. A request using `all` with
 
 ## Response shape
 
-All fields whose name ends in `_cents` are decimal strings, including averages
-and per-day values. A ratio is a finite JSON number in `[0, 1]` where its
-denominator is positive, otherwise it is `null` with a sibling `*_reason`.
+All fields whose name ends in `_cents` are decimal strings. Aggregate amounts
+(`amount_cents`, `income_cents`, `expense_cents`, `balance_cents`, investment
+totals, and their deltas) are integer cents. Average and per-day fields with a
+decimal string use exact numerator/denominator siblings (for example,
+`average_numerator_cents` + `average_denominator`, or
+`daily_expense_numerator_cents` + `daily_expense_denominator_days`); the UI
+must not pass those decimal strings to a BigInt integer-money formatter.
+`share` is a finite JSON number in `[0, 1]` when its denominator is positive.
+`balance_rate` is a signed finite number (it can be negative); growth
+`change_ratio` is a finite signed number and may exceed 1. A zero base or an
+unsupported negative-balance percentage returns `null` with a sibling
+`*_reason`.
 No ratio uses infinity. Future trend buckets are explicit `is_future=true`
 with null measures; covered no-transaction buckets use zero strings.
 
@@ -110,7 +119,9 @@ nature items.
       "items": [{
         "category_code": "exp_food", "category_name": "餐饮",
         "amount_cents": "1299", "transaction_count": 1,
-        "average_cents": "1299.0000", "share": 1.0
+        "average_cents": "1299.0000",
+        "average_numerator_cents": "1299", "average_denominator": 1,
+        "share": 1.0
       }],
       "other": {"category_code": "__other__", "amount_cents": "0", "is_other": true}
     }
@@ -126,7 +137,10 @@ nature items.
   },
   "daily_expense": {
     "expense_cents": "1299", "effective_days": 31,
-    "daily_expense_cents": "41.9032", "denominator": "calendar_days"
+    "daily_expense_cents": "41.9032",
+    "daily_expense_numerator_cents": "1299",
+    "daily_expense_denominator_days": 31,
+    "denominator": "calendar_days"
   },
   "expense_calendar": {
     "month": "2026-08", "total_expense_cents": "1299",
