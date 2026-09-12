@@ -1,48 +1,191 @@
 <!doctype html>
 <html lang="zh-CN">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>账单监控站</title>
-  <link rel="stylesheet" href="/style.css">
-</head>
-<body>
-  <header>
-    <div><small>LOCAL · READ ONLY</small><h1>账单监控站</h1></div>
-    <div id="status" role="status" aria-live="polite">连接中…</div>
-  </header>
-  <main>
-    <section class="controls" aria-label="筛选条件">
-      <label>范围<select id="kind"><option value="month">月</option><option value="day">日</option><option value="quarter">季度</option><option value="half">半年</option><option value="year">年</option><option value="all">全部</option><option value="custom">自选</option></select></label>
-      <label id="value-label">周期<input id="value" aria-label="时间范围"></label>
-      <label>开始<input id="start" type="date"></label>
-      <label>结束<input id="end" type="date"></label>
-      <label>方向<select id="direction"><option value="">全部方向</option><option value="收入">收入</option><option value="支出">支出</option></select></label>
-      <label>性质<select id="nature"><option value="">全部性质</option><option value="日常">日常</option><option value="投资">投资</option><option value="往来">往来</option><option value="调整">调整</option></select></label>
-      <label>标签匹配<select id="mode"><option value="any">任一标签</option><option value="all">全部标签</option></select></label>
-      <button id="reload" type="button">更新</button>
-    </section>
-    <fieldset class="tag-picker"><legend>标签</legend><div id="tags" class="tag-options"><span class="muted">加载中…</span></div></fieldset>
-    <p id="meta"></p>
-    <p id="drill-path" class="drill-path" aria-live="polite">当前分类：全部</p>
-    <section class="cards">
-      <article><span>收入</span><strong id="income">—</strong></article>
-      <article><span>支出</span><strong id="expense">—</strong></article>
-      <article><span>净收支</span><strong id="balance">—</strong></article>
-      <article><span>筛选笔数</span><strong id="count">—</strong></article>
-      <article class="investment"><span>投资净损益</span><strong id="investment">—</strong><small id="investment-meta">收入 — · 支出 —</small></article>
-    </section>
-    <section class="grid">
-      <article><h2>每日趋势</h2><div id="trend" class="bars" aria-label="每日收支趋势"></div></article>
-      <article><h2>分类钻取</h2><div id="categories"></div></article>
-    </section>
-    <section>
-      <h2>交易明细</h2>
-      <div class="table"><table><thead><tr><th>日期</th><th>方向</th><th>分类</th><th>标签</th><th>金额</th></tr></thead><tbody id="rows"></tbody></table></div>
-      <div class="table-actions"><button id="more" type="button" disabled>加载更多</button><span id="page-meta" class="muted"></span></div>
-    </section>
-    <details class="diagnostics" open><summary>本机渲染计时（诊断）</summary><p id="perf" class="muted">首屏 — · 筛选 0/20 · 钻取 0/20 · 自动刷新 0</p></details>
-  </main>
-  <script src="/app.js"></script>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>账单监控站</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#overview">跳至账本概览</a>
+    <aside class="sidebar">
+      <a class="brand" href="#overview"
+        ><span class="brand-mark">账</span
+        ><span>账单监控站<small>LEDGER OBSERVATORY</small></span></a
+      >
+      <div class="nav-label">我的账本</div>
+      <nav aria-label="页面导航">
+        <a class="active" href="#overview"><span>◫</span>账本概览</a
+        ><a href="#analysis"><span>▥</span>收支分析</a
+        ><a href="#transactions"><span>≡</span>交易明细</a>
+      </nav>
+      <div class="sidebar-note">
+        <span class="live-dot"></span> 本机账本 · 只读连接
+        <p>让每一笔收支，清晰可见。</p>
+      </div>
+    </aside>
+    <div class="workspace">
+      <header>
+        <div class="top-crumb">我的账本 <span>/</span> 概览</div>
+        <div id="status" role="status" aria-live="polite">连接中…</div>
+      </header>
+      <main id="overview">
+        <div class="page-heading">
+          <div>
+            <p class="eyebrow">YOUR MONEY, AT A GLANCE</p>
+            <h1>账本概览<span>把生活，记得明明白白。</span></h1>
+          </div>
+          <div class="read-badge">↗ 自动更新<span>仅在本机查看</span></div>
+        </div>
+        <section class="filter-panel" aria-label="账本筛选">
+          <div class="section-heading">
+            <h2>查看范围</h2>
+            <button id="reset" class="text-button" type="button">
+              重置筛选 ↺
+            </button>
+          </div>
+          <section class="controls" aria-label="筛选条件">
+            <label
+              >范围<select id="kind">
+                <option value="month">月</option>
+                <option value="day">日</option>
+                <option value="quarter">季度</option>
+                <option value="half">半年</option>
+                <option value="year">年</option>
+                <option value="all">全部</option>
+                <option value="custom">自选</option>
+              </select></label
+            >
+            <label id="value-label"
+              >周期<input id="value" aria-label="时间范围"
+            /></label>
+            <label>开始<input id="start" type="date" /></label>
+            <label>结束<input id="end" type="date" /></label>
+            <label
+              >方向<select id="direction">
+                <option value="">全部方向</option>
+                <option value="收入">收入</option>
+                <option value="支出">支出</option>
+              </select></label
+            >
+            <label
+              >性质<select id="nature">
+                <option value="">全部性质</option>
+                <option value="日常">日常</option>
+                <option value="投资">投资</option>
+                <option value="往来">往来</option>
+                <option value="调整">调整</option>
+              </select></label
+            >
+            <label
+              >标签匹配<select id="mode">
+                <option value="any">任一标签</option>
+                <option value="all">全部标签</option>
+              </select></label
+            >
+            <button id="reload" type="button">刷新账本</button>
+          </section>
+          <fieldset class="tag-picker">
+            <legend>标签</legend>
+            <div id="tags" class="tag-options">
+              <span class="muted">加载中…</span>
+            </div>
+          </fieldset>
+        </section>
+        <div class="context-line"><p id="meta"></p></div>
+        <div class="drill-context">
+          <p id="drill-path" class="drill-path" aria-live="polite">
+            当前分类：全部
+          </p>
+          <button id="clear-drill" class="text-button" type="button" hidden>
+            返回全部分类 ×
+          </button>
+        </div>
+        <section class="cards">
+          <article class="income-card">
+            <span>总收入 <b>↙</b></span
+            ><strong id="income">—</strong><small>当前范围内的全部收入</small>
+          </article>
+          <article class="expense-card">
+            <span>总支出 <b>↗</b></span
+            ><strong id="expense">—</strong><small>当前范围内的全部支出</small>
+          </article>
+          <article class="balance-card">
+            <span>净收支 <b>≈</b></span
+            ><strong id="balance">—</strong><small>收入 − 支出</small>
+          </article>
+          <article class="count-card">
+            <span>交易笔数 <b>≡</b></span
+            ><strong id="count">—</strong><small>符合当前筛选条件</small>
+          </article>
+          <article class="investment">
+            <span>投资净损益</span><strong id="investment">—</strong
+            ><small id="investment-meta">收入 — · 支出 —</small>
+          </article>
+        </section>
+        <section class="grid" id="analysis">
+          <article class="trend-panel">
+            <div class="section-heading">
+              <div>
+                <h2>收支趋势</h2>
+                <p class="section-note">按日查看资金流动</p>
+              </div>
+              <div class="chart-legend">
+                <span class="income-key">收入</span
+                ><span class="expense-key">支出</span>
+              </div>
+            </div>
+            <div id="trend" class="bars" aria-label="每日收支趋势"></div>
+          </article>
+          <article class="category-panel">
+            <div class="section-heading">
+              <div>
+                <h2>收支构成</h2>
+                <p class="section-note">选择分类组，再查看分类与交易</p>
+              </div>
+              <span class="section-symbol">↗</span>
+            </div>
+            <div id="categories"></div>
+          </article>
+        </section>
+        <section class="transactions" id="transactions">
+          <div class="section-heading">
+            <div>
+              <h2>交易明细</h2>
+              <p class="section-note">每一笔，都有迹可循</p>
+            </div>
+            <span class="table-caption">金额 / 人民币</span>
+          </div>
+          <div class="table">
+            <table>
+              <thead>
+                <tr>
+                  <th>日期</th>
+                  <th>方向</th>
+                  <th>分类</th>
+                  <th>标签</th>
+                  <th>金额</th>
+                </tr>
+              </thead>
+              <tbody id="rows"></tbody>
+            </table>
+          </div>
+          <div class="table-actions">
+            <button id="more" type="button" disabled>加载更多</button
+            ><span id="page-meta" class="muted"></span>
+          </div>
+        </section>
+        <details class="diagnostics">
+          <summary>运行诊断</summary>
+          <p id="perf" class="muted">
+            首屏 — · 筛选 0/20 · 钻取 0/20 · 自动刷新 0
+          </p>
+        </details>
+        <footer>
+          账单监控站 <span>本机只读 · 数据自动同步 · 上海时区</span>
+        </footer>
+      </main>
+    </div>
+    <script src="/app.js"></script>
+  </body>
 </html>
