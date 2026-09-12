@@ -492,7 +492,8 @@ def _prior_range(kind: str, current_start: date, current_end: date,
     raise HTTPException(422, "unknown scope")
 
 
-def _year_ago_range(current_start: date, current_end: date) -> tuple[date, date]:
+def _year_ago_range(current_start: date, current_end: date,
+                    full_natural_period: bool = False) -> tuple[date, date]:
     """Map a half-open range by calendar date, clipping leap day safely.
 
     `current_end` is exclusive. Shifting it directly can collapse a one-day
@@ -503,6 +504,12 @@ def _year_ago_range(current_start: date, current_end: date) -> tuple[date, date]
     """
     if current_start >= current_end:
         raise HTTPException(422, "comparison range must not be empty")
+    if full_natural_period:
+        # Natural period boundaries are already exclusive (for example
+        # 2025-02-01..2025-03-01). Mapping both boundaries preserves a full
+        # month in either leap direction: 2025-02 maps to full 2024-02 and
+        # 2024-02 maps to full 2023-02.
+        return _shift_year(current_start, -1), _shift_year(current_end, -1)
     previous_start = _shift_year(current_start, -1)
     previous_last = _shift_year(current_end - timedelta(days=1), -1)
     previous_end = previous_last + timedelta(days=1)
@@ -610,6 +617,8 @@ def _summary(rows: list[dict]) -> dict:
             "income_cents": str(item["income"]),
             "expense_cents": str(item["expense"]),
             "balance_cents": str(balance),
+            "income_yuan": money(item["income"]),
+            "expense_yuan": money(item["expense"]),
             "balance_yuan": money(balance),
             "balance_rate": rate,
             "balance_rate_reason": reason,
@@ -783,13 +792,15 @@ def _period_summary_item(bucket: dict, rows: list[dict], today: date,
     if future:
         for field in ("transaction_count", "income_cents", "expense_cents", "balance_cents",
                       "income_yuan", "expense_yuan", "balance_yuan", "cumulative_balance_cents",
-                      "nature", "investment"):
+                      "income_count", "expense_count", "nature", "investment"):
             item[field] = None
         return item, cumulative
     summary = _summary(period_rows)
     cumulative += int(summary["balance_cents"])
     item.update({
         "transaction_count": summary["transaction_count"],
+        "income_count": summary["income_count"],
+        "expense_count": summary["expense_count"],
         "income_cents": summary["income_cents"],
         "expense_cents": summary["expense_cents"],
         "balance_cents": summary["balance_cents"],
@@ -923,10 +934,13 @@ def _long_overview(conn: sqlite3.Connection, anchor: date | None, current_end: d
         following = _next_month_date(cursor)
         effective_end = following
         is_current = cursor.year == today.year and cursor.month == today.month
-        partial = False
+        # The selected month is still an unfinished natural month even when
+        # the caller asks for a full-period view; the flag tells the UI not to
+        # present it as a closed month. `display_end_exclusive` continues to
+        # expose the actual queried boundary for either period mode.
+        partial = is_current and today < following
         if is_current and current_end and current_end < following:
             effective_end = max(cursor, current_end)
-            partial = True
         month_rows = [row for row in all_rows
                       if cursor <= _date_value(row["occurred_at"]) < effective_end]
         future = cursor > today
@@ -975,7 +989,7 @@ def _calendar_view(current_start: date | None, current_end: date | None,
         in_scope = bool(current_start and current_end and current_start <= day < current_end)
         future = day > today
         item = by_day.get(day, {"expense": 0, "count": 0})
-        visible = in_scope
+        visible = in_scope and not future
         days.append({
             "date": day.isoformat(),
             "weekday": day.weekday(),
@@ -1023,7 +1037,12 @@ def _comparison_range(kind: str, compare: str, current_start: date | None,
         first, last = _prior_range(kind, current_start, current_end, requested_start, requested_end, period_mode)
         return first, last, "上一期", None
     if compare == "year_ago":
-        first, last = _year_ago_range(current_start, current_end)
+        full_natural_period = (
+            kind in {"month", "quarter", "half", "year"}
+            and requested_start is not None and requested_end is not None
+            and current_start == requested_start and current_end == requested_end
+        )
+        first, last = _year_ago_range(current_start, current_end, full_natural_period)
         return first, last, "去年同期", None
     raise HTTPException(422, "compare must be previous, year_ago, custom or none")
 

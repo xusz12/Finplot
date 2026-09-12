@@ -132,6 +132,8 @@ class ObservatoryApiTests(unittest.TestCase):
         self.assertEqual(body["daily_expense"]["effective_days"], 3)
         self.assertEqual(body["daily_expense"]["daily_expense_cents"], "1099.6667")
         self.assertEqual(sum(int(item["expense_cents"]) for item in body["periods"]), 3299)
+        self.assertEqual(sum(item["income_count"] for item in body["periods"]), 1)
+        self.assertEqual(sum(item["expense_count"] for item in body["periods"]), 2)
         self.assertEqual(body["expense_calendar"]["total_expense_cents"], "1299")
         for direction, total_key in (("income", "income_cents"), ("expense", "expense_cents")):
             changes = body["category_changes_by_direction"][direction]
@@ -157,6 +159,57 @@ class ObservatoryApiTests(unittest.TestCase):
         self.assertEqual(no_base["summary"]["delta"]["expense_cents"]["change_ratio_reason"], "no_base")
         self.assertEqual(no_base["summary"]["delta"]["balance_cents"]["change_ratio_reason"], "negative_balance")
 
+    def test_analytics_category_union_tag_filter_and_calendar_denominator(self):
+        body = self.get("/api/analytics", params={
+            "kind": "month", "value": "2026-01", "compare": "custom",
+            "compare_start": "2024-02-29", "compare_end": "2024-02-29",
+            "period_mode": "full", "grain": "day",
+        }).json()
+        codes = {(item["direction"], item["category_code"]): item for item in body["category_changes"]}
+        self.assertIn(("收入", "inc_salary"), codes)
+        self.assertIn(("支出", "exp_food"), codes)
+        self.assertEqual(codes[("收入", "inc_salary")]["current_cents"], "10000000")
+        self.assertEqual(codes[("支出", "exp_food")]["compare_cents"], "1")
+        self.assertEqual(
+            sum(int(item["delta_cents"]) for item in body["category_changes_by_direction"]["income"]),
+            10000000,
+        )
+        self.assertEqual(
+            sum(int(item["delta_cents"]) for item in body["category_changes_by_direction"]["expense"]),
+            -1,
+        )
+
+        tagged = self.get("/api/analytics", params={
+            "kind": "custom", "start": "2026-08-31", "end": "2026-09-02",
+            "tag": "ai", "compare": "none", "period_mode": "full", "grain": "day",
+        }).json()
+        self.assertEqual(tagged["summary"]["current"]["transaction_count"], 2)
+        self.assertEqual(tagged["daily_expense"]["effective_days"], 3)
+        self.assertEqual(tagged["daily_expense"]["daily_expense_numerator_cents"], "1299")
+        self.assertEqual(tagged["daily_expense"]["daily_expense_denominator_days"], 3)
+        self.assertEqual(tagged["expense_calendar"]["total_expense_cents"], "1299")
+
+    def test_analytics_version_guard_and_future_periods(self):
+        first = self.get("/api/analytics", params={
+            "kind": "month", "value": "2026-09", "compare": "none",
+        }).json()
+        import sqlite3
+        conn = sqlite3.connect(self.db)
+        conn.execute("INSERT INTO transactions VALUES(6,'2026-09-03 00:00:00','支出',700,1,'')")
+        conn.commit(); conn.close()
+        stale = self.get("/api/analytics", params={
+            "kind": "month", "value": "2026-09", "compare": "none", "version": first["version"],
+        })
+        self.assertEqual(stale.status_code, 409)
+        with patch("backend.app.main._analytics_today", return_value=date(2026, 9, 12)):
+            future = self.get("/api/analytics", params={
+                "kind": "year", "value": "2026", "compare": "none", "period_mode": "full", "grain": "month",
+            }).json()
+        october = next(item for item in future["periods"] if item["key"] == "2026-10")
+        self.assertTrue(october["is_future"])
+        self.assertIsNone(october["income_cents"])
+        self.assertIsNone(october["income_count"])
+
     def test_analytics_rejects_ambiguous_comparison(self):
         self.assertEqual(self.get("/api/analytics", params={
             "kind": "month", "value": "2026-08", "compare": "custom",
@@ -178,6 +231,20 @@ class ObservatoryApiTests(unittest.TestCase):
                 self.assertEqual(body["comparison"]["compare"]["end_exclusive"], compare_end)
                 self.assertEqual(body["comparison"]["compare"]["days"], days)
 
+    def test_analytics_year_ago_preserves_complete_month_in_both_leap_directions(self):
+        for month, compare_end, expected_days in (
+            ("2024-02", "2023-03-01", 28),
+            ("2025-02", "2024-03-01", 29),
+        ):
+            with self.subTest(month=month):
+                body = self.get("/api/analytics", params={
+                    "kind": "month", "value": month, "compare": "year_ago",
+                    "period_mode": "full", "grain": "day",
+                }).json()
+                self.assertEqual(body["comparison"]["compare"]["start"], f"{int(month[:4]) - 1}-02-01")
+                self.assertEqual(body["comparison"]["compare"]["end_exclusive"], compare_end)
+                self.assertEqual(body["comparison"]["compare"]["days"], expected_days)
+
     def test_analytics_elapsed_and_full_current_period_have_distinct_year_ago_ranges(self):
         query = {
             "kind": "month", "value": "2026-09", "compare": "year_ago", "grain": "month",
@@ -191,6 +258,7 @@ class ObservatoryApiTests(unittest.TestCase):
         self.assertEqual(full["scope"]["end_exclusive"], "2026-10-01")
         self.assertEqual(full["comparison"]["compare"]["start"], "2025-09-01")
         self.assertEqual(full["comparison"]["compare"]["end_exclusive"], "2025-10-01")
+        self.assertTrue(full["overview_12_months"]["months"][-1]["is_partial"])
         self.assertEqual(self.get("/api/analytics", params={
             "kind": "month", "value": "2026-08", "compare": "none",
             "compare_start": "2026-01-01", "compare_end": "2026-01-02",
