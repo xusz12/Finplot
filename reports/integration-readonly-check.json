@@ -1,0 +1,18 @@
+{
+  "checks": [
+    {
+      "scope": "month",
+      "sql_api_match": true
+    },
+    {
+      "scope": "year",
+      "sql_api_match": true
+    },
+    {
+      "scope": "all",
+      "sql_api_match": true
+    }
+  ],
+  "db_hash_unchanged": true,
+  "sidecars": []
+}
