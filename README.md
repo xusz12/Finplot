@@ -23,6 +23,8 @@ The dashboard is the vanilla JavaScript page in `frontend/` and is served by the
 
 `/api/dashboard` returns decimal strings for every `*_cents` field. Pass `cursor=<next_cursor>` for the next stable page; a changed dataset returns `409` with the current version. A supplied `version` or `if_version` is also checked and returns `409` when stale.
 
+`/api/analytics` is the v1.1 read-only aggregation endpoint. It accepts the same business filters plus `compare=previous|year_ago|custom|none`, optional `compare_start`/`compare_end`, `period_mode=elapsed|full`, `grain=day|month|quarter|half|year`, and `top_n`. The response includes exact Shanghai date boundaries, same-snapshot current/comparison summaries, nature and realized-investment breakdowns, category rankings and union deltas, period/cumulative trends, daily expense and weighted three-month reference, a 12-month overview, and a month expense calendar. See [reports/analytics-v1.1-schema.md](reports/analytics-v1.1-schema.md) for the field contract and synthetic response sample. Aggregate money is integer cents encoded as decimal strings; fractional average/daily values include exact numerator/denominator fields. Invalid combinations return `422`; a stale `version` returns `409`.
+
 ## Verification
 
 ```sh
