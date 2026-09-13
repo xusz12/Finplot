@@ -313,7 +313,8 @@ async function load({append=false,detailOnly=false,refresh=false,retry=0}={}){
     if(detailOnly) {renderRanks(data);renderDetail(detailData,append);$('#drill-path').textContent=detail?`图表选择：${detail.label} · 仅联动分类上下文与明细`:'图表选择：全部';$('#clear-drill').hidden=!detail;}
     else render(data,detailData);
     if(refresh){state.refreshCount++;state.refreshSamples.push({epoch:Date.now(),version:data.version});}
-    $('#perf').textContent=`最近读取并渲染 ${(performance.now()-started).toFixed(1)}ms · 自动刷新 ${state.refreshCount} 次 · 409重同步 ${state.conflicts} 次 · 版本 ${data.version} · 刷新记录 ${JSON.stringify(state.refreshSamples)}`;
+    $('#perf').textContent=`最近读取并渲染 ${(performance.now()-started).toFixed(1)}ms · 自动刷新 ${state.refreshCount} 次 · 409重同步 ${state.conflicts} 次 · 版本 ${data.version}`;
+    let samples=$('#refresh-samples');if(!samples){samples=add(document.querySelector('.diagnostics'),'div');samples.id='refresh-samples';}samples.replaceChildren();for(const sample of state.refreshSamples)add(samples,'p',`刷新 ${sample.epoch} ${sample.version}`);
     $('#status').textContent=`已同步 · ${new Date(state.lastSync).toLocaleTimeString('zh-CN',{hour12:false})}`;
   }catch(error){if(error.name==='AbortError'||mine!==state.serial)return;if(error.status===409&&retry<2){await load({refresh,retry:retry+1});return;}$('#status').textContent=error.message;$('#more').disabled=true;document.querySelector('main').classList.add('data-stale');$('#meta').textContent='读取失败：以下为上次成功结果，请检查筛选后点击刷新账本。';}
   finally{if(mine===state.serial)document.querySelector('main').setAttribute('aria-busy','false');}
