@@ -1,0 +1,5 @@
+The following is a diff from the previous accessibility tree for Window: "账单监控站" with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
++						2652 文本 最近读取并渲染 29.1ms · 自动刷新 0 次 · 409重同步 1 次 · 版本 8b413f97fffa4c3e8f33ebf7b327d901:d145ab99be0fec9f
++						2653 文本 视口 1280px · 页面宽度 1280px
+~					1338 标签 (selected, settable, boolean) Description: 账单监控站 - 内存用量 - 114 MB, Value: on
+The focused UI element is 2644 开合三角标记 运行诊断
