@@ -1,8 +1,10 @@
 # 基础分析 v1.1 后端验证报告
 
-日期：2026-09-12  
-分支：`backend-v1.1-analytics`  
-最新提交：`a8189c0`  
+日期：2026-09-13
+
+分支：`backend-v1.1-analytics`
+
+修复提交：`00f8744`
 范围：task #9 后端接口、聚合口径、只读安全回归与合成库契约测试
 
 ## 交付内容
@@ -13,6 +15,7 @@
 - 覆盖性质拆分、日常结余率、已实现投资损益、分类金额/占比/频次/均笔、分期及累计盈余、日均支出、前三个完整自然月加权参照、近 12 个月概览和月度支出日历。
 - 零基数、负盈余、未来分期、账本边界覆盖和比较不可用均显式表达；不返回无穷大比例。
 - 完整自然周期和自选/单日/未完成周期使用不同的去年同期边界算法，双向闰年均已覆盖。
+- 支出日历的 `transaction_count` 只统计符合筛选的支出交易，与支出明细一致；自选范围即使请求 `period_mode=elapsed` 也保留显式 `[start,end)`，自然周期才按今天截断。
 
 ## 验证
 
@@ -20,7 +23,8 @@
 
 ```text
 python3 -m py_compile backend/app/main.py                         pass
-.../.venv/bin/python -m unittest discover -s tests -v             16/16 pass
+uv run --with fastapi --with httpx --with 'uvicorn[standard]' \
+  python -m unittest discover -s tests -v                          18/18 pass
 .../.venv/bin/pip check                                            No broken requirements found
 node --check frontend/app.js                                      pass
 HTTP smoke on 127.0.0.1:8774                                     1.1 / 2026-08-01..2026-09-01 / 1299 cents / 31 points
@@ -34,6 +38,7 @@ HTTP smoke on 127.0.0.1:8774                                     1.1 / 2026-08-0
 - 性质和总额守恒、分类两期并集及差额守恒、Top N/其他结构；
 - 标签任一去重、自然日分母、前三月加权日均、月历金额守恒；
 - 同一版本校验和数据变化后的 `409`。
+- 支出日历收入-only 日期不计入支出笔数；自选范围跨今天/未来日期的 elapsed/full 边界保持显式结束日。
 
 ## 边界与集成说明
 
