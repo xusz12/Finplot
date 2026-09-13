@@ -1,0 +1,32 @@
+{
+  "8765": {
+    "pid": 63573,
+    "/": {
+      "status": 200,
+      "no_store": "no-store",
+      "csp": true
+    },
+    "/api/analytics?kind=month&value=2026-09&compare=none&period_mode=full": {
+      "status": 200,
+      "no_store": "no-store",
+      "csp": true,
+      "schema_version": null
+    }
+  },
+  "8766": {
+    "pid": 63574,
+    "/": {
+      "status": 200,
+      "no_store": "no-store",
+      "csp": true
+    },
+    "/api/analytics?kind=month&value=2026-09&compare=none&period_mode=full": {
+      "status": 200,
+      "no_store": "no-store",
+      "csp": true,
+      "schema_version": null
+    }
+  },
+  "ledger_hash_unchanged": true,
+  "sidecars": []
+}
