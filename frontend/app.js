@@ -97,7 +97,7 @@ const renderRows = (rows, append) => {
 const state = {
   data: null, detail: null, history: [], selectedTags: new Set(), group: null,
   serial: 0, controller: null, version: null, cursor: null, polling: false,
-  hidden: new Map(), lastSync: null, refreshCount: 0, renderedRows: 0,
+  hidden: new Map(), lastSync: null, refreshCount: 0, renderedRows: 0, refreshSamples: [], conflicts: 0,
 };
 const percent = value => value == null ? '无基数' : `${(Number(value) * 100).toFixed(1)}%`;
 const decimalMoney = value => {
@@ -144,6 +144,7 @@ const detailQuery = (data, detail, cursor) => {
 async function get(url, signal) {
   const response = await fetch(url, {cache:'no-store',signal});
   if (!response.ok) {
+    if(response.status===409)state.conflicts++;
     const err = new Error(response.status === 422 ? '日期或筛选组合无效，请检查输入。' : response.status === 409 ? '账本已变化，正在重新同步…' : '暂时无法读取账本，请重试。');
     err.status = response.status; throw err;
   }
@@ -311,8 +312,8 @@ async function load({append=false,detailOnly=false,refresh=false,retry=0}={}){
     document.querySelector('main').classList.remove('data-stale');state.data=data;state.version=data.version;state.lastSync=Date.now();
     if(detailOnly) {renderRanks(data);renderDetail(detailData,append);$('#drill-path').textContent=detail?`图表选择：${detail.label} · 仅联动分类上下文与明细`:'图表选择：全部';$('#clear-drill').hidden=!detail;}
     else render(data,detailData);
-    if(refresh)state.refreshCount++;
-    $('#perf').textContent=`最近读取并渲染 ${(performance.now()-started).toFixed(1)}ms · 自动刷新 ${state.refreshCount} 次 · 版本 ${data.version}`;
+    if(refresh){state.refreshCount++;state.refreshSamples.push({epoch:Date.now(),version:data.version});}
+    $('#perf').textContent=`最近读取并渲染 ${(performance.now()-started).toFixed(1)}ms · 自动刷新 ${state.refreshCount} 次 · 409重同步 ${state.conflicts} 次 · 版本 ${data.version} · 刷新记录 ${JSON.stringify(state.refreshSamples)}`;
     $('#status').textContent=`已同步 · ${new Date(state.lastSync).toLocaleTimeString('zh-CN',{hour12:false})}`;
   }catch(error){if(error.name==='AbortError'||mine!==state.serial)return;if(error.status===409&&retry<2){await load({refresh,retry:retry+1});return;}$('#status').textContent=error.message;$('#more').disabled=true;document.querySelector('main').classList.add('data-stale');$('#meta').textContent='读取失败：以下为上次成功结果，请检查筛选后点击刷新账本。';}
   finally{if(mine===state.serial)document.querySelector('main').setAttribute('aria-busy','false');}
