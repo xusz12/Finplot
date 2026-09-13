@@ -35,6 +35,8 @@ const syncScopeControls = () => {
   $("#value-label").hidden = custom || all;
   $("#start").parentElement.hidden = !custom;
   $("#end").parentElement.hidden = !custom;
+  $("#period-mode-label").hidden = custom;
+  $("#period-mode").disabled = custom;
   if (kind === "month") {
     value.type = "month";
     value.placeholder = "YYYY-MM";
@@ -124,7 +126,8 @@ const action = (parent, label, fn, className = '') => {
   const b = add(parent, 'button', label); b.type = 'button'; b.className = className; b.addEventListener('click', fn); return b;
 };
 const query = () => {
-  const q = new URLSearchParams({kind: $('#kind').value, tag_mode: $('#mode').value, compare: $('#compare').value, period_mode: $('#period-mode').value, grain: $('#grain').value, top_n: '0'});
+  const kind = $('#kind').value;
+  const q = new URLSearchParams({kind, tag_mode: $('#mode').value, compare: $('#compare').value, period_mode: kind === 'custom' ? 'full' : $('#period-mode').value, grain: $('#grain').value, top_n: '0'});
   if ($('#kind').value === 'custom') {q.set('start', $('#start').value); q.set('end', $('#end').value);}
   else if ($('#kind').value !== 'all') q.set('value', $('#value').value);
   for (const key of ['direction', 'nature']) if ($('#'+key).value) q.set(key,$('#'+key).value);
