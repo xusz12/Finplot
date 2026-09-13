@@ -447,7 +447,8 @@ def _effective_current_range(kind: str, value: str | None, start: str | None, en
     else:
         actual_start, actual_end = requested_start, requested_end
     partial = False
-    if (period_mode == "elapsed" and actual_start and actual_end and
+    if (kind in {"month", "quarter", "half", "year"} and
+            period_mode == "elapsed" and actual_start and actual_end and
             actual_start <= today < actual_end and actual_end > today + timedelta(days=1)):
         actual_end = today + timedelta(days=1)
         partial = True
@@ -982,7 +983,7 @@ def _calendar_view(current_start: date | None, current_end: date | None,
         item = by_day.setdefault(day, {"expense": 0, "count": 0})
         if row["direction"] == "支出":
             item["expense"] += int(row["amount_cents"])
-        item["count"] += 1
+            item["count"] += 1
     days = []
     for offset in range((following - anchor).days):
         day = anchor + timedelta(days=offset)

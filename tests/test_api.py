@@ -189,6 +189,33 @@ class ObservatoryApiTests(unittest.TestCase):
         self.assertEqual(tagged["daily_expense"]["daily_expense_denominator_days"], 3)
         self.assertEqual(tagged["expense_calendar"]["total_expense_cents"], "1299")
 
+    def test_expense_calendar_counts_only_expense_transactions(self):
+        body = self.get("/api/analytics", params={
+            "kind": "month", "value": "2026-09",
+            "compare": "none", "period_mode": "full", "grain": "day",
+        }).json()
+        day = next(item for item in body["expense_calendar"]["days"]
+                   if item["date"] == "2026-09-01")
+        self.assertEqual(day["expense_cents"], "0")
+        self.assertEqual(day["transaction_count"], 0)
+        self.assertEqual(day["empty_label"], "无记录")
+
+    def test_elapsed_custom_scope_preserves_explicit_future_end(self):
+        with patch("backend.app.main._analytics_today", return_value=date(2026, 9, 13)):
+            body = self.get("/api/analytics", params={
+                "kind": "custom", "start": "2026-09-01", "end": "2026-09-30",
+                "compare": "none", "period_mode": "elapsed", "grain": "day",
+            }).json()
+        self.assertEqual(body["scope"]["start"], "2026-09-01")
+        self.assertEqual(body["scope"]["end_exclusive"], "2026-10-01")
+        self.assertEqual(body["scope"]["requested_end_exclusive"], "2026-10-01")
+        self.assertEqual(body["scope"]["days"], 30)
+        self.assertFalse(body["scope"]["is_partial"])
+        future_day = next(item for item in body["expense_calendar"]["days"]
+                          if item["date"] == "2026-09-14")
+        self.assertTrue(future_day["is_future"])
+        self.assertIsNone(future_day["transaction_count"])
+
     def test_analytics_version_guard_and_future_periods(self):
         first = self.get("/api/analytics", params={
             "kind": "month", "value": "2026-09", "compare": "none",
