@@ -83,6 +83,10 @@
                 <option value="all">全部标签</option>
               </select></label
             >
+            <label>对比<select id="compare"><option value="previous">上期</option><option value="year_ago">去年同期</option><option value="custom">自选对比</option><option value="none">关闭对比</option></select></label>
+            <label>本期进度<select id="period-mode"><option value="elapsed">截至今天</option><option value="full">完整周期</option></select></label>
+            <label hidden>对比开始<input id="compare-start" type="date" /></label>
+            <label hidden>对比结束<input id="compare-end" type="date" /></label>
             <button id="reload" type="button">刷新账本</button>
           </section>
           <fieldset class="tag-picker">
@@ -123,36 +127,30 @@
             ><small id="investment-meta">收入 — · 支出 —</small>
           </article>
         </section>
-        <section class="grid" id="analysis">
-          <article class="trend-panel">
-            <div class="section-heading">
-              <div>
-                <h2>收支趋势</h2>
-                <p class="section-note">按日查看资金流动</p>
-              </div>
-              <div class="chart-legend">
-                <span class="income-key">收入</span
-                ><span class="expense-key">支出</span>
-              </div>
-            </div>
-            <div id="trend" class="bars" aria-label="每日收支趋势"></div>
+        <section id="analysis" class="analysis-sections">
+          <article class="analysis-panel">
+            <div class="section-heading"><div><p class="eyebrow">01 / CASH FLOW</p><h2>收支趋势</h2><p class="section-note">分期收支与盈余 · 图例显隐不改变统计</p></div>
+            <label>图表粒度<select id="grain"><option value="day">日</option><option value="month">月</option><option value="quarter">季度</option><option value="half">半年</option><option value="year">年</option></select></label></div>
+            <div id="trend"></div>
+            <div class="section-heading"><h3>盈余走势</h3><label>显示<select id="balance-view"><option value="period">分期盈余</option><option value="cumulative">累计盈余</option></select></label></div>
+            <p id="cumulative-note" class="section-note">累计从所选范围开始计算，不是账户余额。</p><div id="balance-trend"></div>
           </article>
-          <article class="category-panel">
-            <div class="section-heading">
-              <div>
-                <h2>收支构成</h2>
-                <p class="section-note">选择分类组，再查看分类与交易</p>
-              </div>
-              <span class="section-symbol">↗</span>
-            </div>
-            <div id="categories"></div>
-          </article>
+          <div class="analysis-pair">
+            <article class="analysis-panel"><div class="section-heading"><div><p class="eyebrow">02 / BREAKDOWN</p><h2>分类排行</h2></div><label>显示<select id="top-n"><option value="5">前5</option><option value="10">前10</option><option value="all">全部</option></select></label></div><p class="section-note">金额 · 占比 · 交易频次 · 平均单笔</p><div id="categories"></div></article>
+            <article class="analysis-panel"><div class="section-heading"><div><p class="eyebrow">03 / WHAT CHANGED</p><h2>变化原因</h2></div><label>方向<select id="change-direction"><option value="支出">支出</option><option value="收入">收入</option></select></label></div><p class="section-note">本期 − 对比期，按差额绝对金额排序</p><div id="changes"></div></article>
+          </div>
+          <article class="analysis-panel"><p class="eyebrow">04 / EVERYDAY</p><h2>日常与账单性质</h2><div id="nature-cards" class="nature-grid"></div><div id="daily-stats" class="daily-stats"></div><p class="section-note">日常结余率 = 日常盈余 ÷ 日常收入；按已记录账单计算。</p><div id="daily-trend"></div></article>
+          <article class="analysis-panel"><p class="eyebrow">05 / REALIZED RETURNS</p><h2>已实现投资损益</h2><p class="section-note">投资已计入总收支；不包含本金、市值或收益率。</p><div id="investment-stats" class="daily-stats"></div><div id="investment-trend"></div><label>净损益走势<select id="investment-view"><option value="period">分期净损益</option><option value="cumulative">累计净损益</option></select></label><div id="investment-net"></div></article>
+          <div class="analysis-pair">
+            <article class="analysis-panel"><div class="section-heading"><div><p class="eyebrow">06 / SPENDING DAYS</p><h2>支出日历</h2></div><label>月份<input id="calendar-month" type="month" /></label></div><p id="calendar-note" class="section-note"></p><div id="calendar" class="calendar"></div><p class="section-note">浅 → 深：支出由少到多 · 无记录与未来日期独立标示</p></article>
+            <article class="analysis-panel"><p class="eyebrow">07 / LONG VIEW</p><h2>近12个月概览</h2><p id="long-note" class="section-note"></p><div id="long-trend"></div></article>
+          </div>
         </section>
         <section class="transactions" id="transactions">
           <div class="section-heading">
             <div>
               <h2>交易明细</h2>
-              <p class="section-note">每一笔，都有迹可循</p>
+              <p id="detail-context" class="section-note">本期 · 全部交易</p><button id="detail-back" type="button" class="text-button" hidden>返回上一层</button> <button id="detail-clear" type="button" class="text-button" hidden>清除图表选择</button>
             </div>
             <span class="table-caption">金额 / 人民币</span>
           </div>
@@ -186,6 +184,7 @@
         </footer>
       </main>
     </div>
+    <script src="/charts.js"></script>
     <script src="/app.js"></script>
   </body>
 </html>
