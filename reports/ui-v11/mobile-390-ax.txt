@@ -1,0 +1,1731 @@
+Window: "账单监控站", App: Google Chrome.
+0 标准窗口 账单监控站 - Google Chrome - Ehzihs, URL: 127.0.0.1:8770/#analysis, Secondary Actions: Raise
+	1 container 账单监控站 - Google Chrome - Ehzihs, URL: 127.0.0.1:8770/#analysis
+		2 container
+			3 工具栏
+				4 按钮 返回
+				5 按钮 (disabled) 前进
+				6 按钮 重新加载
+				7 按钮 在拆分视图中打开标签页
+				8 container
+					9 弹出式按钮 查看网站信息
+					10 文本栏 (settable) Description: 地址和搜索栏, Value: 127.0.0.1:8770/#analysis, Placeholder: 问问 Google 或输入网址
+					11 按钮 为此标签页添加书签
+				12 弹出式按钮 扩展程序
+				13 按钮 Ehzihs
+				14 弹出式按钮 Chrome
+			15 工具栏 书签
+				16 书签按钮 哔哩哔哩 (゜-゜)つロ 干杯~-bilibili
+				17 书签文件夹按钮 AI
+				18 书签文件夹按钮 闲暇
+				19 书签文件夹按钮 开发
+				20 书签文件夹按钮 工具🔧
+				21 书签文件夹按钮 新闻
+				22 书签文件夹按钮 vpn
+				23 书签文件夹按钮 待办
+				24 书签文件夹按钮 固定
+				25 书签按钮 Latest U.S. News | Top headlines from the USA | Reuters
+				26 书签按钮 Bloomberg Asia
+				27 书签按钮 CLI Proxy API Management Center
+				28 书签按钮 xteam | Raft
+				29 书签按钮 xteam | Raft
+				30 书签按钮 X 上的 stdrc：“Agent swarms are a wrong turn from my perspective. After training models toward this behavior, nearly every frontier model now has a strong tendency to spawn subagents for everything. In practice, it’s often slower and doesn’t work as well.” / X
+				31 书签按钮 Warning signs abound for Trump's Republicans as midterm campaign begins final sprint | Reuters
+				32 书签按钮 账单监控站
+			33 container
+				34 HTML 内容 DevTools, URL: devtools://devtools/bundled/devtools_app.html?remoteBase=https://chrome-devtools-frontend.appspot.com/serve_file/@79460ebecaa5625e57a5fb679a735659e73dc687/&targetType=tab&can_dock=true
+					35 container
+						36 container
+							37 container
+								38 工具栏
+									39 文本 Dimensions:
+									40 弹出式按钮 Description: Device type, Value: Responsive
+										41 (selected) Responsive
+									42 步进器 (settable, float) Description: Width, Value: 390
+									43 文本 ×
+									44 步进器 (settable, float) Description: Height (leave empty for full), Value: 844
+									45 弹出式按钮 Description: Zoom, Value: Fit to window
+										46 (selected) Fit to window
+									47 弹出式按钮 Description: Throttling, Value: Disabled: No throttling
+										48 (selected) Disabled: No throttling
+									49 弹出式按钮 'Save-Data': default
+										50 (selected) 'Save-Data': default
+									51 按钮 Rotate
+								52 工具栏
+									53 按钮 More options
+								54 container
+							55 container
+								56 container DevTools is now available in Chinese
+									57 文本 DevTools is now available in Chinese
+									58 按钮 Don’t show again
+									59 按钮 Always match Chrome’s language
+									60 按钮 Switch DevTools to Chinese
+									61 container Close
+										62 按钮 Close
+								63 container
+									64 container
+										65 container Main toolbar
+											66 工具栏
+												67 container Description: Select an element in the page to inspect it, Help: Select an element in the page to inspect it - ⌘ ⇧ C
+													68 切换按钮 Description: Select an element in the page to inspect it - ⌘ ⇧ C, Value: 0
+												69 container Description: Toggle device toolbar, Help: Toggle device toolbar - ⌘ ⇧ M
+													70 切换按钮 Description: Toggle device toolbar - ⌘ ⇧ M, Value: 1
+											71 container
+												72 标签组 Panels
+												73 弹出式按钮 More tabs
+											74 工具栏
+												75 按钮 Page: Main
+												76 container Description: Settings, Help: Settings - F1 - ⇧ ?
+													77 按钮 Settings - F1 - ⇧ ?
+												78 弹出式按钮 Customize and control DevTools
+													79 按钮 Customize and control DevTools
+												80 container Close
+													81 按钮 Close
+										82 container Elements panel
+											83 container elements
+												84 container
+													85 container
+														86 container DOM tree explorer
+															87 外框 Page DOM
+																88 row <!DOCTYPE html>
+																	89 container
+																		90 文本 <!DOCTYPE html>
+																91 row <html lang=​"zh-CN"> ​ View source code This element has a scrollable overflow
+																	92 container
+																		93 container <html lang=​"zh-CN">
+																			94 text < html lang =​" zh-CN " >
+																		95 container View source code
+																			96 文本 view-source
+																		97 container This element has a scrollable overflow
+																			98 文本 scroll
+																99 container
+																	100 row    <head> ​ Expand …​ </head> ​
+																		101 container
+																			102 container <head>
+																				103 text < head >
+																			104 按钮 Expand
+																			105 text …
+																			106 container </head>
+																				107 text < /head >
+																	108 row (selected)    <body> ​
+																		109 container
+																			110 container <body>
+																				111 text < body >
+																	112 row <a class=​"skip-link" href=​"#overview"> ​跳至账本概览​ </a> ​
+																		113 container
+																			114 container <a class=​"skip-link" href=​"#overview">
+																				115 text < a class =​" skip-link " href =​"
+																				116 链接 Description: #overview, Help: http://127.0.0.1:8770/#overview
+																					117 文本 #overview
+																				118 text " >
+																			119 text 跳至账本概览
+																			120 container </a>
+																				121 text < /a >
+																	122 row    <aside class=​"sidebar"> ​ Expand …​ </aside> ​
+																		123 container
+																			124 container <aside class=​"sidebar">
+																				125 text < aside class =​" sidebar " >
+																			126 按钮 Expand
+																			127 text …
+																			128 container </aside>
+																				129 text < /aside >
+																	130 row    <div class=​"workspace"> ​ Expand …​ </div> ​
+																		131 container
+																			132 container <div class=​"workspace">
+																				133 text < div class =​" workspace " >
+																			134 按钮 Expand
+																			135 text …
+																			136 container </div>
+																				137 text < /div >
+																	138 row <script src=​"/​charts.js"> ​ </script> ​
+																		139 container
+																			140 container <script src=​"/​charts.js">
+																				141 text < script src =​"
+																				142 链接 Description: /​charts.js, Help: http://127.0.0.1:8770/charts.js
+																					143 文本 /​charts.js
+																				144 text " >
+																			145 container </script>
+																				146 text < /script >
+																	147 row <script src=​"/​app.js"> ​ </script> ​
+																		148 container
+																			149 container <script src=​"/​app.js">
+																				150 text < script src =​"
+																				151 链接 Description: /​app.js, Help: http://127.0.0.1:8770/app.js
+																					152 文本 /​app.js
+																				153 text " >
+																			154 container </script>
+																				155 text < /script >
+																	156 row <> ​
+																		157 container
+																			158 container <>
+																				159 text < /body >
+																	160 row <> ​
+																		161 container
+																			162 container <>
+																				163 text < /html >
+														164 container DOM tree breadcrumbs
+															165 内容列表
+																166 link Description: html, Value: devtools://devtools/bundled/devtools_app.html?remoteBase=https://chrome-devtools-frontend.appspot.com/serve_file/@79460ebecaa5625e57a5fb679a735659e73dc687/&targetType=tab&can_dock=true#
+																167 link Description: body, Value: devtools://devtools/bundled/devtools_app.html?remoteBase=https://chrome-devtools-frontend.appspot.com/serve_file/@79460ebecaa5625e57a5fb679a735659e73dc687/&targetType=tab&can_dock=true#
+													168 container
+														169 container Side panel toolbar
+															170 container
+																171 标签组
+																	172 标签 (selected) Description: Styles, Value: 1
+																	173 标签 (settable, integer) Description: Computed, Value: 0
+																	174 标签 (settable, integer) Description: Layout, Value: 0
+																175 弹出式按钮 More tabs
+														176 container Side panel content
+															177 container Styles panel
+																178 container
+																	179 container
+																		180 工具栏
+																			181 container
+																				182 文本输入区 (settable) Filter
+																					183 文本 Filter
+																				184 container Use regular expression
+																					185 切换按钮 Description: Use regular expression, Value: 0
+																				186 container Toggle Element State
+																					187 切换按钮 Description: Toggle Element State, Value: 0
+																				188 container Element Classes
+																					189 切换按钮 Description: Element Classes, Value: 0
+																				190 container New Style Rule
+																					191 按钮 New Style Rule
+																				192 container Toggle common rendering emulations
+																					193 切换按钮 Description: Toggle common rendering emulations, Value: 0
+																				194 container Show Computed Styles sidebar
+																					195 按钮 Show Computed Styles sidebar
+																		196 内容列表
+																			197 container element.style, css selector
+																				198 container
+																					199 container CSS selector
+																						200 文本 element.style
+																					201 文本  {
+																				202 container
+																					203 文本 }
+																			204 container body, css selector
+																				205 链接 Description: style.css:16, Help: http://127.0.0.1:8770/style.css:16
+																					206 文本 style.css:16
+																				207 container
+																					208 container CSS selector
+																						209 文本 body
+																					210 文本  {
+																				211 外框
+																					212 row  CSS property name: margin : CSS property value: 0 ;
+																						213 container CSS property name: margin
+																							214 文本 margin
+																						215 文本 : 
+																						216 container CSS property value: 0
+																							217 文本 0
+																						218 文本 ;
+																					219 row  CSS property name: background : CSS property value: var(--paper) ;
+																						220 container CSS property name: background
+																							221 文本 background
+																						222 文本 : 
+																						223 container CSS property value: var(--paper)
+																							224 container
+																								225 text var (
+																								226 链接 --paper
+																									227 文本 --paper
+																								228 文本 )
+																						229 文本 ;
+																					230 row  CSS property name: color : CSS property value: var(--ink) ;
+																						231 container CSS property name: color
+																							232 文本 color
+																						233 文本 : 
+																						234 container CSS property value: var(--ink)
+																							235 container
+																								236 text var (
+																								237 链接 --ink
+																									238 文本 --ink
+																								239 文本 )
+																						240 文本 ;
+																					241 row  CSS property name: font : CSS property value: 14px -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif ;
+																						242 container CSS property name: font
+																							243 文本 font
+																						244 文本 : 
+																						245 container CSS property value: 14px -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif
+																							246 文本 14px
+																							247 文本 -apple-system
+																							248 文本 ,
+																							249 文本 BlinkMacSystemFont
+																							250 文本 ,
+																							251 文本 "Segoe UI"
+																							252 文本 ,
+																							253 文本 "PingFang SC"
+																							254 文本 ,
+																							255 文本 sans-serif
+																						256 文本 ;
+																					257 row  CSS property name: line-height : CSS property value: 1.5 ;
+																						258 container CSS property name: line-height
+																							259 文本 line-height
+																						260 文本 : 
+																						261 container CSS property value: 1.5
+																							262 文本 1.5
+																						263 文本 ;
+																				264 container
+																					265 文本 }
+																			266 container *, css selector
+																				267 链接 Description: style.css:9, Help: http://127.0.0.1:8770/style.css:9
+																					268 文本 style.css:9
+																				269 container
+																					270 container CSS selector
+																						271 文本 *
+																					272 文本  {
+																				273 外框
+																					274 row  CSS property name: box-sizing : CSS property value: border-box ;
+																						275 container CSS property name: box-sizing
+																							276 文本 box-sizing
+																						277 文本 : 
+																						278 container CSS property value: border-box
+																							279 文本 border-box
+																						280 文本 ;
+																				281 container
+																					282 文本 }
+																			283 container body, css selector
+																				284 文本 user agent stylesheet
+																				285 container
+																					286 container CSS selector
+																						287 文本 body
+																					288 文本  {
+																				289 外框
+																					290 row  CSS property name: display : CSS property value: block ;
+																						291 container CSS property name: display
+																							292 文本 display
+																						293 文本 : 
+																						294 container CSS property value: block
+																							295 文本 block
+																						296 文本 ;
+																					297 row  CSS property name: margin : CSS property value: 8px ;
+																						298 container CSS property name: margin
+																							299 文本 margin
+																						300 文本 : 
+																						301 container CSS property value: 8px
+																							302 文本 8px
+																						303 文本 ;
+																				304 container
+																					305 文本 }
+																			306 container
+																				307 文本 Inherited from 
+																				308 按钮 html
+																			309 container :root, css selector
+																				310 链接 Description: style.css:1, Help: http://127.0.0.1:8770/style.css:1
+																					311 文本 style.css:1
+																				312 container
+																					313 container CSS selector
+																						314 文本 :root
+																					315 文本  {
+																				316 外框
+																					317 row  CSS property name: color-scheme : CSS property value: light ;
+																						318 container CSS property name: color-scheme
+																							319 文本 color-scheme
+																						320 文本 : 
+																						321 container CSS property value: light
+																							322 文本 light
+																						323 文本 ;
+																					324 row  CSS property name: --ink : CSS property value: #203931 ;
+																						325 container CSS property name: --ink
+																							326 文本 --ink
+																						327 文本 : 
+																						328 container CSS property value: #203931
+																							329 文本 #203931
+																						330 文本 ;
+																					331 row  CSS property name: --muted : CSS property value: #7a8983 ;
+																						332 container CSS property name: --muted
+																							333 文本 --muted
+																						334 文本 : 
+																						335 container CSS property value: #7a8983
+																							336 文本 #7a8983
+																						337 文本 ;
+																					338 row  CSS property name: --green : CSS property value: #246650 ;
+																						339 container CSS property name: --green
+																							340 文本 --green
+																						341 文本 : 
+																						342 container CSS property value: #246650
+																							343 文本 #246650
+																						344 文本 ;
+																					345 row  CSS property name: --line : CSS property value: #e6ebe7 ;
+																						346 container CSS property name: --line
+																							347 文本 --line
+																						348 文本 : 
+																						349 container CSS property value: #e6ebe7
+																							350 文本 #e6ebe7
+																						351 文本 ;
+																					352 row  CSS property name: --paper : CSS property value: #f5f7f4 ;
+																						353 container CSS property name: --paper
+																							354 文本 --paper
+																						355 文本 : 
+																						356 container CSS property value: #f5f7f4
+																							357 文本 #f5f7f4
+																						358 文本 ;
+																				359 container
+																					360 文本 }
+																	361 container
+																		362 text margin 0 0
+																		363 文本 border
+																		364 文本 0
+																		365 文本 0
+																		366 container
+																			367 text padding 0 0
+																			368 文本 390
+																			369 文本 ×
+																			370 文本 11078.594
+																			371 text 0 0
+																		372 文本 0
+																		373 文本 0
+																		374 text 0 0
+									375 container Tool drawer
+										376 container
+											377 工具栏
+												378 弹出式按钮 More Tools
+													379 按钮 More Tools
+											380 标签组
+												381 标签 (selected) Description: What’s new, Value: 1
+											382 弹出式按钮 More tabs
+											383 工具栏
+												384 container Toggle drawer orientation
+													385 按钮 Toggle drawer orientation
+												386 container Minimize drawer
+													387 按钮 Minimize drawer
+												388 container Close drawer
+													389 按钮 Close drawer
+											390 container What’s new panel
+												391 container whats-new
+													392 container
+														393 文本 What’s new in DevTools 152
+														394 按钮 See all new features
+														395 标题 DevTools for agents, Value: 3
+															396 链接 Description: DevTools for agents, Help: https://developer.chrome.com/blog/new-in-devtools-152/#devtools-for-agents
+																397 文本 DevTools for agents
+														398 container
+															399 text DevTools for agents 1.7 improves memory profiling with the  get_heapsnapshot_object_details  tool and native V8 context filtering.
+														400 标题 Soft navigation metrics in Live Metrics, Value: 3
+															401 链接 Description: Soft navigation metrics in Live Metrics, Help: https://developer.chrome.com/blog/new-in-devtools-152/#performance
+																402 文本 Soft navigation metrics in Live Metrics
+														403 文本 The Live Metrics view in the Performance panel now captures and reports metrics like LCP and INP for client-side soft navigations in single-page applications by default.
+														404 标题 Nested CSS parent selector interactions, Value: 3
+															405 链接 Description: Nested CSS parent selector interactions, Help: https://developer.chrome.com/blog/new-in-devtools-152/#nested-selectors
+																406 文本 Nested CSS parent selector interactions
+														407 container
+															408 text Hovering over parent selectors highlights matching elements on the page, nested rules respond to Styles tab filtering, and  @nested-declarations  include specificity tooltips.
+						409 文本 DevTools is docked to right 
+				410 HTML 内容 账单监控站, URL: 127.0.0.1:8770/#analysis
+					411 link Description: 跳至账本概览, Value: 127.0.0.1:8770/#overview
+					412 container
+						413 link Description: 账 账单监控站 LEDGER OBSERVATORY, Value: 127.0.0.1:8770/#overview
+						414 container 页面导航
+							415 link Description: ◫ 账本概览, Value: 127.0.0.1:8770/#overview
+							416 link Description: ▥ 收支分析, Value: 127.0.0.1:8770/#analysis
+							417 link Description: ≡ 交易明细, Value: 127.0.0.1:8770/#transactions
+					418 container
+						419 text 我的账本  /  概览 已同步 · 10:12:38
+					420 container
+						421 文本 YOUR MONEY, AT A GLANCE
+						422 标题 账本概览 把生活，记得明明白白。, Value: 1
+							423 text 账本概览 把生活，记得明明白白。
+						424 text ↗ 自动更新 仅在本机查看
+						425 container 账本筛选
+							426 标题 查看范围, Value: 2
+								427 文本 查看范围
+							428 按钮 重置筛选 ↺
+							429 container 筛选条件
+								430 container
+									431 文本 范围
+									432 弹出式按钮 范围, Value: 月
+										433 (selected) 月
+								434 container
+									435 文本 周期
+									436 月份选择器 Description: 时间范围, Value: 2026-09
+										437 container
+											438 步进器 (settable, float) Description: 年 时间范围, Value: 2026, Placeholder: ----
+											439 文本 年
+											440 步进器 (settable, float) Description: 月 时间范围, Value: 9, Details: 09, Placeholder: --
+											441 文本 月
+										442 弹出式按钮 显示月份选择器
+								443 container
+									444 文本 方向
+									445 弹出式按钮 方向, Value: 全部方向
+										446 (selected) 全部方向
+								447 container
+									448 文本 性质
+									449 弹出式按钮 性质, Value: 全部性质
+										450 (selected) 全部性质
+								451 container
+									452 文本 标签匹配
+									453 弹出式按钮 标签匹配, Value: 任一标签
+										454 (selected) 任一标签
+								455 container
+									456 文本 对比
+									457 弹出式按钮 对比, Value: 上期
+										458 (selected) 上期
+								459 container
+									460 文本 本期进度
+									461 弹出式按钮 本期进度, Value: 截至今天
+										462 (selected) 截至今天
+								463 按钮 刷新账本
+							464 container 标签
+								465 文本 标签
+								466 container
+									467 复选框 AI, Value: 0
+									468 文本 AI
+									469 复选框 订阅, Value: 0
+									470 文本 订阅
+						471 text 本期 2026-09-01 至 2026-09-13（13天） · 对比期 2026-08-01 至 2026-08-13（13天） · 上海时区 · 数据截止 2026-09-10 12:00:00 图表选择：全部
+						472 container
+							473 text 总收入 ↙ ¥3,050.00 -¥1,950.00 · -39%
+						474 container
+							475 text 总支出 ↗ ¥9,990.45 +¥1,690.45 · +20.3%
+						476 container
+							477 text 净收支 ≈ -¥6,940.45 -¥3,640.45 · 金额变化
+						478 container
+							479 text 交易笔数 ≡ 73 符合当前筛选条件
+						480 container
+							481 text 投资净损益 ¥30.00 已实现收益 ¥50.00 · 已实现亏损 ¥20.00
+						482 container
+							483 文本 01 / CASH FLOW
+							484 标题 收支趋势, Value: 2
+								485 文本 收支趋势
+							486 text 分期收支与盈余 · 图例显隐不改变统计 图表粒度
+							487 弹出式按钮 图表粒度, Value: 日
+								488 (selected) 日
+							489 切换按钮 ▥ 本期收入, Value: 1
+							490 切换按钮 ▥ 本期支出, Value: 1
+							491 切换按钮 ▥ 对比期收入, Value: 1
+							492 切换按钮 ▥ 对比期支出, Value: 1
+							493 container 分期收支
+								494 文本 ¥0.00
+								495 文本 ¥2,000.00
+								496 文本 ¥4,000.00
+								497 文本 ¥6,000.00
+								498 文本 ¥8,000.00
+								499 按钮 2026-09-01 · 本期 2026-09-01 至 2026-09-01；对比期 2026-08-01 至 2026-08-01；本期收入 ¥3,050.00 / 2笔；本期支出 ¥958.30 / 7笔；对比期收入 ¥4,000.00 / 1笔；对比期支出 ¥0.00 / 0笔
+									500 图形符号
+									501 图形符号
+									502 图形符号
+									503 图形符号
+								504 文本 2026-09-01
+								505 按钮 2026-09-02 · 本期 2026-09-02 至 2026-09-02；对比期 2026-08-02 至 2026-08-02；本期收入 ¥0.00 / 0笔；本期支出 ¥986.91 / 8笔；对比期收入 ¥0.00 / 0笔；对比期支出 ¥8,000.00 / 1笔
+									506 图形符号
+									507 图形符号
+									508 图形符号
+									509 图形符号
+								510 按钮 2026-09-03 · 本期 2026-09-03 至 2026-09-03；对比期 2026-08-03 至 2026-08-03；本期收入 ¥0.00 / 0笔；本期支出 ¥975.52 / 7笔；对比期收入 ¥1,000.00 / 1笔；对比期支出 ¥0.00 / 0笔
+									511 图形符号
+									512 图形符号
+									513 图形符号
+									514 图形符号
+								515 文本 2026-09-03
+								516 按钮 2026-09-04 · 本期 2026-09-04 至 2026-09-04；对比期 2026-08-04 至 2026-08-04；本期收入 ¥0.00 / 0笔；本期支出 ¥984.13 / 7笔；对比期收入 ¥0.00 / 0笔；对比期支出 ¥300.00 / 1笔
+									517 图形符号
+									518 图形符号
+									519 图形符号
+									520 图形符号
+								521 按钮 2026-09-05 · 本期 2026-09-05 至 2026-09-05；对比期 2026-08-05 至 2026-08-05；本期收入 ¥0.00 / 0笔；本期支出 ¥992.74 / 7笔；对比期收入 ¥0.00 / 0笔；对比期支出 ¥0.00 / 0笔
+									522 图形符号
+									523 图形符号
+									524 图形符号
+									525 图形符号
+								526 文本 2026-09-05
+								527 按钮 2026-09-06 · 本期 2026-09-06 至 2026-09-06；对比期 2026-08-06 至 2026-08-06；本期收入 ¥0.00 / 0笔；本期支出 ¥1,001.35 / 7笔；对比期收入 ¥0.00 / 0笔；对比期支出 ¥0.00 / 0笔
+									528 图形符号
+									529 图形符号
+									530 图形符号
+									531 图形符号
+								532 按钮 2026-09-07 · 本期 2026-09-07 至 2026-09-07；对比期 2026-08-07 至 2026-08-07；本期收入 ¥0.00 / 0笔；本期支出 ¥1,009.96 / 7笔；对比期收入 ¥0.00 / 0笔；对比期支出 ¥0.00 / 0笔
+									533 图形符号
+									534 图形符号
+									535 图形符号
+									536 图形符号
+								537 文本 2026-09-07
+								538 按钮 2026-09-08 · 本期 2026-09-08 至 2026-09-08；对比期 2026-08-08 至 2026-08-08；本期收入 ¥0.00 / 0笔；本期支出 ¥1,018.57 / 7笔；对比期收入 ¥0.00 / 0笔；对比期支出 ¥0.00 / 0笔
+									539 图形符号
+									540 图形符号
+									541 图形符号
+									542 图形符号
+								543 按钮 2026-09-09 · 本期 2026-09-09 至 2026-09-09；对比期 2026-08-09 至 2026-08-09；本期收入 ¥0.00 / 0笔；本期支出 ¥1,027.18 / 7笔；对比期收入 ¥0.00 / 0笔；对比期支出 ¥0.00 / 0笔
+									544 图形符号
+									545 图形符号
+									546 图形符号
+									547 图形符号
+								548 文本 2026-09-09
+								549 按钮 2026-09-10 · 本期 2026-09-10 至 2026-09-10；对比期 2026-08-10 至 2026-08-10；本期收入 ¥0.00 / 0笔；本期支出 ¥1,035.79 / 7笔；对比期收入 ¥0.00 / 0笔；对比期支出 ¥0.00 / 0笔
+									550 图形符号
+									551 图形符号
+									552 图形符号
+									553 图形符号
+								554 按钮 2026-09-11 · 本期 2026-09-11 至 2026-09-11；对比期 2026-08-11 至 2026-08-11；本期收入 ¥0.00 / 0笔；本期支出 ¥0.00 / 0笔；对比期收入 ¥0.00 / 0笔；对比期支出 ¥0.00 / 0笔
+									555 图形符号
+									556 图形符号
+									557 图形符号
+									558 图形符号
+								559 文本 2026-09-11
+								560 按钮 2026-09-12 · 本期 2026-09-12 至 2026-09-12；对比期 2026-08-12 至 2026-08-12；本期收入 ¥0.00 / 0笔；本期支出 ¥0.00 / 0笔；对比期收入 ¥0.00 / 0笔；对比期支出 ¥0.00 / 0笔
+									561 图形符号
+									562 图形符号
+									563 图形符号
+									564 图形符号
+								565 按钮 2026-09-13 · 本期 2026-09-13 至 2026-09-13；对比期 2026-08-13 至 2026-08-13；本期收入 ¥0.00 / 0笔；本期支出 ¥0.00 / 0笔；对比期收入 ¥0.00 / 0笔；对比期支出 ¥0.00 / 0笔
+									566 图形符号
+									567 图形符号
+									568 图形符号
+									569 图形符号
+								570 文本 2026-09-13
+							571 文本 悬停或选择图形查看精确数据；点击图形查看明细。
+							572 开合三角标记 查看数据与两期明细入口
+								573 文本 查看数据与两期明细入口
+							574 标题 盈余走势, Value: 3
+								575 文本 盈余走势
+							576 文本 显示
+							577 弹出式按钮 显示, Value: 分期盈余
+								578 (selected) 分期盈余
+							579 文本 累计从所选范围开始计算，不是账户余额。
+							580 切换按钮 ━ 本期盈余, Value: 1
+							581 切换按钮 ━ 对比期盈余, Value: 1
+							582 container 盈余走势
+								583 文本 -¥8,000.00
+								584 文本 -¥5,000.00
+								585 文本 -¥2,000.00
+								586 文本 ¥1,000.00
+								587 文本 ¥4,000.00
+								588 按钮 2026-09-01 · 本期 2026-09-01 至 2026-09-01；对比期 2026-08-01 至 2026-08-01；本期盈余 ¥2,091.70；对比期盈余 ¥4,000.00
+									589 按钮 2026-09-01 · 本期盈余 ¥2,091.70 · 本期 2026-09-01 至 2026-09-01；对比期 2026-08-01 至 2026-08-01
+									590 按钮 2026-09-01 · 对比期盈余 ¥4,000.00 · 本期 2026-09-01 至 2026-09-01；对比期 2026-08-01 至 2026-08-01
+								591 文本 2026-09-01
+								592 按钮 2026-09-02 · 本期 2026-09-02 至 2026-09-02；对比期 2026-08-02 至 2026-08-02；本期盈余 -¥986.91；对比期盈余 -¥8,000.00
+									593 按钮 2026-09-02 · 本期盈余 -¥986.91 · 本期 2026-09-02 至 2026-09-02；对比期 2026-08-02 至 2026-08-02
+									594 按钮 2026-09-02 · 对比期盈余 -¥8,000.00 · 本期 2026-09-02 至 2026-09-02；对比期 2026-08-02 至 2026-08-02
+								595 按钮 2026-09-03 · 本期 2026-09-03 至 2026-09-03；对比期 2026-08-03 至 2026-08-03；本期盈余 -¥975.52；对比期盈余 ¥1,000.00
+									596 按钮 2026-09-03 · 本期盈余 -¥975.52 · 本期 2026-09-03 至 2026-09-03；对比期 2026-08-03 至 2026-08-03
+									597 按钮 2026-09-03 · 对比期盈余 ¥1,000.00 · 本期 2026-09-03 至 2026-09-03；对比期 2026-08-03 至 2026-08-03
+								598 按钮 2026-09-04 · 本期 2026-09-04 至 2026-09-04；对比期 2026-08-04 至 2026-08-04；本期盈余 -¥984.13；对比期盈余 -¥300.00
+									599 按钮 2026-09-04 · 本期盈余 -¥984.13 · 本期 2026-09-04 至 2026-09-04；对比期 2026-08-04 至 2026-08-04
+									600 按钮 2026-09-04 · 对比期盈余 -¥300.00 · 本期 2026-09-04 至 2026-09-04；对比期 2026-08-04 至 2026-08-04
+								601 文本 2026-09-04
+								602 按钮 2026-09-05 · 本期 2026-09-05 至 2026-09-05；对比期 2026-08-05 至 2026-08-05；本期盈余 -¥992.74；对比期盈余 ¥0.00
+									603 按钮 2026-09-05 · 本期盈余 -¥992.74 · 本期 2026-09-05 至 2026-09-05；对比期 2026-08-05 至 2026-08-05
+									604 按钮 2026-09-05 · 对比期盈余 ¥0.00 · 本期 2026-09-05 至 2026-09-05；对比期 2026-08-05 至 2026-08-05
+								605 按钮 2026-09-06 · 本期 2026-09-06 至 2026-09-06；对比期 2026-08-06 至 2026-08-06；本期盈余 -¥1,001.35；对比期盈余 ¥0.00
+									606 按钮 2026-09-06 · 本期盈余 -¥1,001.35 · 本期 2026-09-06 至 2026-09-06；对比期 2026-08-06 至 2026-08-06
+									607 按钮 2026-09-06 · 对比期盈余 ¥0.00 · 本期 2026-09-06 至 2026-09-06；对比期 2026-08-06 至 2026-08-06
+								608 按钮 2026-09-07 · 本期 2026-09-07 至 2026-09-07；对比期 2026-08-07 至 2026-08-07；本期盈余 -¥1,009.96；对比期盈余 ¥0.00
+									609 按钮 2026-09-07 · 本期盈余 -¥1,009.96 · 本期 2026-09-07 至 2026-09-07；对比期 2026-08-07 至 2026-08-07
+									610 按钮 2026-09-07 · 对比期盈余 ¥0.00 · 本期 2026-09-07 至 2026-09-07；对比期 2026-08-07 至 2026-08-07
+								611 文本 2026-09-07
+								612 按钮 2026-09-08 · 本期 2026-09-08 至 2026-09-08；对比期 2026-08-08 至 2026-08-08；本期盈余 -¥1,018.57；对比期盈余 ¥0.00
+									613 按钮 2026-09-08 · 本期盈余 -¥1,018.57 · 本期 2026-09-08 至 2026-09-08；对比期 2026-08-08 至 2026-08-08
+									614 按钮 2026-09-08 · 对比期盈余 ¥0.00 · 本期 2026-09-08 至 2026-09-08；对比期 2026-08-08 至 2026-08-08
+								615 按钮 2026-09-09 · 本期 2026-09-09 至 2026-09-09；对比期 2026-08-09 至 2026-08-09；本期盈余 -¥1,027.18；对比期盈余 ¥0.00
+									616 按钮 2026-09-09 · 本期盈余 -¥1,027.18 · 本期 2026-09-09 至 2026-09-09；对比期 2026-08-09 至 2026-08-09
+									617 按钮 2026-09-09 · 对比期盈余 ¥0.00 · 本期 2026-09-09 至 2026-09-09；对比期 2026-08-09 至 2026-08-09
+								618 按钮 2026-09-10 · 本期 2026-09-10 至 2026-09-10；对比期 2026-08-10 至 2026-08-10；本期盈余 -¥1,035.79；对比期盈余 ¥0.00
+									619 按钮 2026-09-10 · 本期盈余 -¥1,035.79 · 本期 2026-09-10 至 2026-09-10；对比期 2026-08-10 至 2026-08-10
+									620 按钮 2026-09-10 · 对比期盈余 ¥0.00 · 本期 2026-09-10 至 2026-09-10；对比期 2026-08-10 至 2026-08-10
+								621 文本 2026-09-10
+								622 按钮 2026-09-11 · 本期 2026-09-11 至 2026-09-11；对比期 2026-08-11 至 2026-08-11；本期盈余 ¥0.00；对比期盈余 ¥0.00
+									623 按钮 2026-09-11 · 本期盈余 ¥0.00 · 本期 2026-09-11 至 2026-09-11；对比期 2026-08-11 至 2026-08-11
+									624 按钮 2026-09-11 · 对比期盈余 ¥0.00 · 本期 2026-09-11 至 2026-09-11；对比期 2026-08-11 至 2026-08-11
+								625 按钮 2026-09-12 · 本期 2026-09-12 至 2026-09-12；对比期 2026-08-12 至 2026-08-12；本期盈余 ¥0.00；对比期盈余 ¥0.00
+									626 按钮 2026-09-12 · 本期盈余 ¥0.00 · 本期 2026-09-12 至 2026-09-12；对比期 2026-08-12 至 2026-08-12
+									627 按钮 2026-09-12 · 对比期盈余 ¥0.00 · 本期 2026-09-12 至 2026-09-12；对比期 2026-08-12 至 2026-08-12
+								628 按钮 2026-09-13 · 本期 2026-09-13 至 2026-09-13；对比期 2026-08-13 至 2026-08-13；本期盈余 ¥0.00；对比期盈余 ¥0.00
+									629 按钮 2026-09-13 · 本期盈余 ¥0.00 · 本期 2026-09-13 至 2026-09-13；对比期 2026-08-13 至 2026-08-13
+									630 按钮 2026-09-13 · 对比期盈余 ¥0.00 · 本期 2026-09-13 至 2026-09-13；对比期 2026-08-13 至 2026-08-13
+								631 文本 2026-09-13
+							632 文本 悬停或选择图形查看精确数据；点击图形查看明细。
+							633 开合三角标记 查看数据与两期明细入口
+								634 文本 查看数据与两期明细入口
+						635 container
+							636 文本 02 / BREAKDOWN
+							637 标题 分类排行, Value: 2
+								638 文本 分类排行
+							639 文本 显示
+							640 弹出式按钮 显示, Value: 前5
+								641 (selected) 前5
+							642 文本 金额 · 占比 · 交易频次 · 平均单笔
+							643 标题 收入 · ¥3,050.00, Value: 3
+								644 文本 收入 · ¥3,050.00
+							645 按钮 工资 ¥3,000.00 98.3% · 1 笔 · 均笔 ¥3,000.00 · 查看分类组 10000
+								646 container
+									647 text 工资 ¥3,000.00
+								648 文本 98.3% · 1 笔 · 均笔 ¥3,000.00 · 查看分类组
+								649 进度指示器 Description: 工资 98.3%, Value: 10000
+							650 按钮 投资收益 ¥50.00 1.6% · 1 笔 · 均笔 ¥50.00 · 查看分类组 166
+								651 container
+									652 text 投资收益 ¥50.00
+								653 文本 1.6% · 1 笔 · 均笔 ¥50.00 · 查看分类组
+								654 进度指示器 Description: 投资收益 1.6%, Value: 166
+							655 标题 支出 · ¥9,990.45, Value: 3
+								656 文本 支出 · ¥9,990.45
+							657 按钮 合成分类11 ¥1,461.25 14.6% · 10 笔 · 均笔 ¥146.13 · 查看分类组 10000
+								658 container
+									659 text 合成分类11 ¥1,461.25
+								660 文本 14.6% · 10 笔 · 均笔 ¥146.13 · 查看分类组
+								661 进度指示器 Description: 合成分类11 14.6%, Value: 10000
+							662 按钮 合成分类10 ¥1,448.95 14.5% · 10 笔 · 均笔 ¥144.90 · 查看分类组 9915
+								663 container
+									664 text 合成分类10 ¥1,448.95
+								665 文本 14.5% · 10 笔 · 均笔 ¥144.90 · 查看分类组
+								666 进度指示器 Description: 合成分类10 14.5%, Value: 9915
+							667 按钮 合成分类16 ¥1,436.65 14.3% · 10 笔 · 均笔 ¥143.67 · 查看分类组 9831
+								668 container
+									669 text 合成分类16 ¥1,436.65
+								670 文本 14.3% · 10 笔 · 均笔 ¥143.67 · 查看分类组
+								671 进度指示器 Description: 合成分类16 14.3%, Value: 9831
+							672 按钮 合成分类15 ¥1,424.35 14.2% · 10 笔 · 均笔 ¥142.44 · 查看分类组 9747
+								673 container
+									674 text 合成分类15 ¥1,424.35
+								675 文本 14.2% · 10 笔 · 均笔 ¥142.44 · 查看分类组
+								676 进度指示器 Description: 合成分类15 14.2%, Value: 9747
+							677 按钮 合成分类14 ¥1,412.05 14.1% · 10 笔 · 均笔 ¥141.21 · 查看分类组 9663
+								678 container
+									679 text 合成分类14 ¥1,412.05
+								680 文本 14.1% · 10 笔 · 均笔 ¥141.21 · 查看分类组
+								681 进度指示器 Description: 合成分类14 14.1%, Value: 9663
+							682 按钮 其他 3 个分类 · 展开 ¥2,807.20 28% · 21 笔 · 均笔 ¥133.68 10000
+								683 container
+									684 text 其他 3 个分类 · 展开 ¥2,807.20
+								685 文本 28% · 21 笔 · 均笔 ¥133.68
+								686 进度指示器 Description: 其他 3 个分类 · 展开 28%, Value: 10000
+						687 container
+							688 文本 03 / WHAT CHANGED
+							689 标题 变化原因, Value: 2
+								690 文本 变化原因
+							691 文本 方向
+							692 弹出式按钮 方向, Value: 支出
+								693 (selected) 支出
+							694 文本 本期 − 对比期，按差额绝对金额排序
+							695 container 分类金额增减，左侧减少、右侧增加
+								696 文本 ← 减少
+								697 文本 增加 →
+								698 按钮 餐饮，差额 -¥8,000.00，本期 ¥0.00，对比期 ¥8,000.00
+									699 文本 餐饮
+									700 文本 -¥8,000.00
+								701 按钮 合成分类11，差额 ¥1,461.25，本期 ¥1,461.25，对比期 ¥0.00
+									702 文本 合成分类11
+									703 文本 +¥1,461.25
+								704 按钮 合成分类10，差额 ¥1,448.95，本期 ¥1,448.95，对比期 ¥0.00
+									705 文本 合成分类10
+									706 文本 +¥1,448.95
+								707 按钮 合成分类16，差额 ¥1,436.65，本期 ¥1,436.65，对比期 ¥0.00
+									708 文本 合成分类16
+									709 文本 +¥1,436.65
+								710 按钮 合成分类15，差额 ¥1,424.35，本期 ¥1,424.35，对比期 ¥0.00
+									711 文本 合成分类15
+									712 文本 +¥1,424.35
+								713 按钮 合成分类14，差额 ¥1,412.05，本期 ¥1,412.05，对比期 ¥0.00
+									714 文本 合成分类14
+									715 文本 +¥1,412.05
+								716 按钮 合成分类13，差额 ¥1,399.75，本期 ¥1,399.75，对比期 ¥0.00
+									717 文本 合成分类13
+									718 文本 +¥1,399.75
+								719 按钮 合成分类12，差额 ¥1,387.45，本期 ¥1,387.45，对比期 ¥0.00
+									720 文本 合成分类12
+									721 文本 +¥1,387.45
+								722 按钮 投资损失，差额 -¥280.00，本期 ¥20.00，对比期 ¥300.00
+									723 文本 投资损失
+									724 文本 -¥280.00
+							725 文本 餐饮 · -¥8,000.00 · -100%
+							726 文本 交易频次 0 / 1 笔；均笔 — / ¥8,000.00
+							727 按钮 本期 ¥0.00
+							728 按钮 对比期 ¥8,000.00
+							729 文本 合成分类11 · +¥1,461.25 · 无基数
+							730 文本 交易频次 10 / 0 笔；均笔 ¥146.13 / —
+							731 按钮 本期 ¥1,461.25
+							732 按钮 对比期 ¥0.00
+							733 文本 合成分类10 · +¥1,448.95 · 无基数
+							734 文本 交易频次 10 / 0 笔；均笔 ¥144.90 / —
+							735 按钮 本期 ¥1,448.95
+							736 按钮 对比期 ¥0.00
+							737 文本 合成分类16 · +¥1,436.65 · 无基数
+							738 文本 交易频次 10 / 0 笔；均笔 ¥143.67 / —
+							739 按钮 本期 ¥1,436.65
+							740 按钮 对比期 ¥0.00
+							741 文本 合成分类15 · +¥1,424.35 · 无基数
+							742 文本 交易频次 10 / 0 笔；均笔 ¥142.44 / —
+							743 按钮 本期 ¥1,424.35
+							744 按钮 对比期 ¥0.00
+							745 文本 合成分类14 · +¥1,412.05 · 无基数
+							746 文本 交易频次 10 / 0 笔；均笔 ¥141.21 / —
+							747 按钮 本期 ¥1,412.05
+							748 按钮 对比期 ¥0.00
+							749 文本 合成分类13 · +¥1,399.75 · 无基数
+							750 文本 交易频次 10 / 0 笔；均笔 ¥139.98 / —
+							751 按钮 本期 ¥1,399.75
+							752 按钮 对比期 ¥0.00
+							753 文本 合成分类12 · +¥1,387.45 · 无基数
+							754 文本 交易频次 10 / 0 笔；均笔 ¥138.75 / —
+							755 按钮 本期 ¥1,387.45
+							756 按钮 对比期 ¥0.00
+							757 文本 投资损失 · -¥280.00 · -93.3%
+							758 文本 交易频次 1 / 1 笔；均笔 ¥20.00 / ¥300.00
+							759 按钮 本期 ¥20.00
+							760 按钮 对比期 ¥300.00
+						761 container
+							762 文本 04 / EVERYDAY
+							763 标题 日常与账单性质, Value: 2
+								764 文本 日常与账单性质
+							765 按钮 日常 盈余 -¥6,970.45 收入 ¥3,000.00 / 支出 ¥9,970.45 71 笔
+								766 文本 日常
+								767 文本 盈余 -¥6,970.45
+								768 文本 收入 ¥3,000.00 / 支出 ¥9,970.45
+								769 文本 71 笔
+							770 按钮 投资 盈余 ¥30.00 收入 ¥50.00 / 支出 ¥20.00 2 笔
+								771 文本 投资
+								772 文本 盈余 ¥30.00
+								773 文本 收入 ¥50.00 / 支出 ¥20.00
+								774 文本 2 笔
+							775 按钮 往来 盈余 ¥0.00 收入 ¥0.00 / 支出 ¥0.00 0 笔
+								776 文本 往来
+								777 文本 盈余 ¥0.00
+								778 文本 收入 ¥0.00 / 支出 ¥0.00
+								779 文本 0 笔
+							780 按钮 调整 盈余 ¥0.00 收入 ¥0.00 / 支出 ¥0.00 0 笔
+								781 文本 调整
+								782 文本 盈余 ¥0.00
+								783 文本 收入 ¥0.00 / 支出 ¥0.00
+								784 文本 0 笔
+							785 文本 日常结余率
+							786 文本 -232.3%
+							787 text 日常盈余 ÷ 日常收入 本期日均支出
+							788 文本 ¥768.50
+							789 text 13 个自然日 · 不随无记录日缩短 近3个月参照 / 日
+							790 文本 ¥90.36
+							791 text 2026-06-01 至 2026-08-31 · 92 天 近3个月月均
+							792 文本 ¥2,771.00
+							793 text 按已记录账单计算；仅以账本边界核对覆盖范围 · 边界覆盖 92 天 日常结余率 = 日常盈余 ÷ 日常收入；按已记录账单计算。
+							794 切换按钮 ━ 日常结余率, Value: 1
+							795 container 近12个月日常结余率
+								796 文本 -232.3%
+								797 文本 -149.3%
+								798 文本 -66.2%
+								799 文本 16.9%
+								800 文本 100.0%
+								801 按钮 2025-10 · 日常结余率：无基数；日常结余率 无基数
+								802 文本 2025-10
+								803 按钮 2025-11 · 日常结余率：无基数；日常结余率 无基数
+								804 按钮 2025-12 · 日常结余率：无基数；日常结余率 无基数
+								805 按钮 2026-01 · 日常结余率 100.0%；日常结余率 100.0%
+									806 按钮 2026-01 · 日常结余率 100.0% · 日常结余率 100.0%
+								807 文本 2026-01
+								808 按钮 2026-02 · 日常结余率：无基数；日常结余率 无基数
+								809 按钮 2026-03 · 日常结余率：无基数；日常结余率 无基数
+								810 按钮 2026-04 · 日常结余率：无基数；日常结余率 无基数
+								811 文本 2026-04
+								812 按钮 2026-05 · 日常结余率：无基数；日常结余率 无基数
+								813 按钮 2026-06 · 日常结余率：无基数；日常结余率 无基数
+								814 按钮 2026-07 · 日常结余率：无基数；日常结余率 无基数
+								815 文本 2026-07
+								816 按钮 2026-08 · 日常结余率 -100.3%；日常结余率 -100.3%
+									817 按钮 2026-08 · 日常结余率 -100.3% · 日常结余率 -100.3%
+								818 按钮 2026-09 · 日常结余率 -232.3%；日常结余率 -232.3%
+									819 按钮 2026-09 · 日常结余率 -232.3% · 日常结余率 -232.3%
+							820 文本 悬停或选择图形查看精确数据；点击图形查看明细。
+							821 开合三角标记 查看数据与两期明细入口
+								822 文本 查看数据与两期明细入口
+						823 container
+							824 文本 05 / REALIZED RETURNS
+							825 标题 已实现投资损益, Value: 2
+								826 文本 已实现投资损益
+							827 text 投资已计入总收支；不包含本金、市值或收益率。 已实现收益
+							828 文本 ¥50.00
+							829 text 2 笔投资交易 已实现亏损
+							830 文本 ¥20.00
+							831 text 亏损以支出记录 净损益
+							832 文本 ¥30.00
+							833 文本 已实现收益 − 已实现亏损
+							834 切换按钮 ▥ 已实现收益, Value: 1
+							835 切换按钮 ▥ 已实现亏损, Value: 1
+							836 container 已实现投资收益与亏损
+								837 文本 ¥0.00
+								838 文本 ¥12.50
+								839 文本 ¥25.00
+								840 文本 ¥37.50
+								841 文本 ¥50.00
+								842 按钮 2026-09-01 · 本期 2026-09-01 至 2026-09-01；对比期 2026-08-01 至 2026-08-01；已实现收益 ¥50.00；已实现亏损 ¥0.00
+									843 图形符号
+									844 图形符号
+								845 文本 2026-09-01
+								846 按钮 2026-09-02 · 本期 2026-09-02 至 2026-09-02；对比期 2026-08-02 至 2026-08-02；已实现收益 ¥0.00；已实现亏损 ¥20.00
+									847 图形符号
+									848 图形符号
+								849 按钮 2026-09-03 · 本期 2026-09-03 至 2026-09-03；对比期 2026-08-03 至 2026-08-03；已实现收益 ¥0.00；已实现亏损 ¥0.00
+									850 图形符号
+									851 图形符号
+								852 按钮 2026-09-04 · 本期 2026-09-04 至 2026-09-04；对比期 2026-08-04 至 2026-08-04；已实现收益 ¥0.00；已实现亏损 ¥0.00
+									853 图形符号
+									854 图形符号
+								855 文本 2026-09-04
+								856 按钮 2026-09-05 · 本期 2026-09-05 至 2026-09-05；对比期 2026-08-05 至 2026-08-05；已实现收益 ¥0.00；已实现亏损 ¥0.00
+									857 图形符号
+									858 图形符号
+								859 按钮 2026-09-06 · 本期 2026-09-06 至 2026-09-06；对比期 2026-08-06 至 2026-08-06；已实现收益 ¥0.00；已实现亏损 ¥0.00
+									860 图形符号
+									861 图形符号
+								862 按钮 2026-09-07 · 本期 2026-09-07 至 2026-09-07；对比期 2026-08-07 至 2026-08-07；已实现收益 ¥0.00；已实现亏损 ¥0.00
+									863 图形符号
+									864 图形符号
+								865 文本 2026-09-07
+								866 按钮 2026-09-08 · 本期 2026-09-08 至 2026-09-08；对比期 2026-08-08 至 2026-08-08；已实现收益 ¥0.00；已实现亏损 ¥0.00
+									867 图形符号
+									868 图形符号
+								869 按钮 2026-09-09 · 本期 2026-09-09 至 2026-09-09；对比期 2026-08-09 至 2026-08-09；已实现收益 ¥0.00；已实现亏损 ¥0.00
+									870 图形符号
+									871 图形符号
+								872 按钮 2026-09-10 · 本期 2026-09-10 至 2026-09-10；对比期 2026-08-10 至 2026-08-10；已实现收益 ¥0.00；已实现亏损 ¥0.00
+									873 图形符号
+									874 图形符号
+								875 文本 2026-09-10
+								876 按钮 2026-09-11 · 本期 2026-09-11 至 2026-09-11；对比期 2026-08-11 至 2026-08-11；已实现收益 ¥0.00；已实现亏损 ¥0.00
+									877 图形符号
+									878 图形符号
+								879 按钮 2026-09-12 · 本期 2026-09-12 至 2026-09-12；对比期 2026-08-12 至 2026-08-12；已实现收益 ¥0.00；已实现亏损 ¥0.00
+									880 图形符号
+									881 图形符号
+								882 按钮 2026-09-13 · 本期 2026-09-13 至 2026-09-13；对比期 2026-08-13 至 2026-08-13；已实现收益 ¥0.00；已实现亏损 ¥0.00
+									883 图形符号
+									884 图形符号
+								885 文本 2026-09-13
+							886 文本 悬停或选择图形查看精确数据；点击图形查看明细。
+							887 开合三角标记 查看数据与两期明细入口
+								888 文本 查看数据与两期明细入口
+							889 文本 净损益走势
+							890 弹出式按钮 净损益走势, Value: 分期净损益
+								891 (selected) 分期净损益
+							892 切换按钮 ━ 分期净损益, Value: 1
+							893 切换按钮 ━ 对比期净损益, Value: 1
+							894 container 已实现投资净损益
+								895 文本 -¥300.00
+								896 文本 ¥25.00
+								897 文本 ¥350.00
+								898 文本 ¥675.00
+								899 文本 ¥1,000.00
+								900 按钮 2026-09-01 · 本期 2026-09-01 至 2026-09-01；对比期 2026-08-01 至 2026-08-01；分期净损益 ¥50.00；对比期净损益 ¥0.00
+									901 按钮 2026-09-01 · 分期净损益 ¥50.00 · 本期 2026-09-01 至 2026-09-01；对比期 2026-08-01 至 2026-08-01
+									902 按钮 2026-09-01 · 对比期净损益 ¥0.00 · 本期 2026-09-01 至 2026-09-01；对比期 2026-08-01 至 2026-08-01
+								903 文本 2026-09-01
+								904 按钮 2026-09-02 · 本期 2026-09-02 至 2026-09-02；对比期 2026-08-02 至 2026-08-02；分期净损益 -¥20.00；对比期净损益 ¥0.00
+									905 按钮 2026-09-02 · 分期净损益 -¥20.00 · 本期 2026-09-02 至 2026-09-02；对比期 2026-08-02 至 2026-08-02
+									906 按钮 2026-09-02 · 对比期净损益 ¥0.00 · 本期 2026-09-02 至 2026-09-02；对比期 2026-08-02 至 2026-08-02
+								907 按钮 2026-09-03 · 本期 2026-09-03 至 2026-09-03；对比期 2026-08-03 至 2026-08-03；分期净损益 ¥0.00；对比期净损益 ¥1,000.00
+									908 按钮 2026-09-03 · 分期净损益 ¥0.00 · 本期 2026-09-03 至 2026-09-03；对比期 2026-08-03 至 2026-08-03
+									909 按钮 2026-09-03 · 对比期净损益 ¥1,000.00 · 本期 2026-09-03 至 2026-09-03；对比期 2026-08-03 至 2026-08-03
+								910 按钮 2026-09-04 · 本期 2026-09-04 至 2026-09-04；对比期 2026-08-04 至 2026-08-04；分期净损益 ¥0.00；对比期净损益 -¥300.00
+									911 按钮 2026-09-04 · 分期净损益 ¥0.00 · 本期 2026-09-04 至 2026-09-04；对比期 2026-08-04 至 2026-08-04
+									912 按钮 2026-09-04 · 对比期净损益 -¥300.00 · 本期 2026-09-04 至 2026-09-04；对比期 2026-08-04 至 2026-08-04
+								913 文本 2026-09-04
+								914 按钮 2026-09-05 · 本期 2026-09-05 至 2026-09-05；对比期 2026-08-05 至 2026-08-05；分期净损益 ¥0.00；对比期净损益 ¥0.00
+									915 按钮 2026-09-05 · 分期净损益 ¥0.00 · 本期 2026-09-05 至 2026-09-05；对比期 2026-08-05 至 2026-08-05
+									916 按钮 2026-09-05 · 对比期净损益 ¥0.00 · 本期 2026-09-05 至 2026-09-05；对比期 2026-08-05 至 2026-08-05
+								917 按钮 2026-09-06 · 本期 2026-09-06 至 2026-09-06；对比期 2026-08-06 至 2026-08-06；分期净损益 ¥0.00；对比期净损益 ¥0.00
+									918 按钮 2026-09-06 · 分期净损益 ¥0.00 · 本期 2026-09-06 至 2026-09-06；对比期 2026-08-06 至 2026-08-06
+									919 按钮 2026-09-06 · 对比期净损益 ¥0.00 · 本期 2026-09-06 至 2026-09-06；对比期 2026-08-06 至 2026-08-06
+								920 按钮 2026-09-07 · 本期 2026-09-07 至 2026-09-07；对比期 2026-08-07 至 2026-08-07；分期净损益 ¥0.00；对比期净损益 ¥0.00
+									921 按钮 2026-09-07 · 分期净损益 ¥0.00 · 本期 2026-09-07 至 2026-09-07；对比期 2026-08-07 至 2026-08-07
+									922 按钮 2026-09-07 · 对比期净损益 ¥0.00 · 本期 2026-09-07 至 2026-09-07；对比期 2026-08-07 至 2026-08-07
+								923 文本 2026-09-07
+								924 按钮 2026-09-08 · 本期 2026-09-08 至 2026-09-08；对比期 2026-08-08 至 2026-08-08；分期净损益 ¥0.00；对比期净损益 ¥0.00
+									925 按钮 2026-09-08 · 分期净损益 ¥0.00 · 本期 2026-09-08 至 2026-09-08；对比期 2026-08-08 至 2026-08-08
+									926 按钮 2026-09-08 · 对比期净损益 ¥0.00 · 本期 2026-09-08 至 2026-09-08；对比期 2026-08-08 至 2026-08-08
+								927 按钮 2026-09-09 · 本期 2026-09-09 至 2026-09-09；对比期 2026-08-09 至 2026-08-09；分期净损益 ¥0.00；对比期净损益 ¥0.00
+									928 按钮 2026-09-09 · 分期净损益 ¥0.00 · 本期 2026-09-09 至 2026-09-09；对比期 2026-08-09 至 2026-08-09
+									929 按钮 2026-09-09 · 对比期净损益 ¥0.00 · 本期 2026-09-09 至 2026-09-09；对比期 2026-08-09 至 2026-08-09
+								930 按钮 2026-09-10 · 本期 2026-09-10 至 2026-09-10；对比期 2026-08-10 至 2026-08-10；分期净损益 ¥0.00；对比期净损益 ¥0.00
+									931 按钮 2026-09-10 · 分期净损益 ¥0.00 · 本期 2026-09-10 至 2026-09-10；对比期 2026-08-10 至 2026-08-10
+									932 按钮 2026-09-10 · 对比期净损益 ¥0.00 · 本期 2026-09-10 至 2026-09-10；对比期 2026-08-10 至 2026-08-10
+								933 文本 2026-09-10
+								934 按钮 2026-09-11 · 本期 2026-09-11 至 2026-09-11；对比期 2026-08-11 至 2026-08-11；分期净损益 ¥0.00；对比期净损益 ¥0.00
+									935 按钮 2026-09-11 · 分期净损益 ¥0.00 · 本期 2026-09-11 至 2026-09-11；对比期 2026-08-11 至 2026-08-11
+									936 按钮 2026-09-11 · 对比期净损益 ¥0.00 · 本期 2026-09-11 至 2026-09-11；对比期 2026-08-11 至 2026-08-11
+								937 按钮 2026-09-12 · 本期 2026-09-12 至 2026-09-12；对比期 2026-08-12 至 2026-08-12；分期净损益 ¥0.00；对比期净损益 ¥0.00
+									938 按钮 2026-09-12 · 分期净损益 ¥0.00 · 本期 2026-09-12 至 2026-09-12；对比期 2026-08-12 至 2026-08-12
+									939 按钮 2026-09-12 · 对比期净损益 ¥0.00 · 本期 2026-09-12 至 2026-09-12；对比期 2026-08-12 至 2026-08-12
+								940 按钮 2026-09-13 · 本期 2026-09-13 至 2026-09-13；对比期 2026-08-13 至 2026-08-13；分期净损益 ¥0.00；对比期净损益 ¥0.00
+									941 按钮 2026-09-13 · 分期净损益 ¥0.00 · 本期 2026-09-13 至 2026-09-13；对比期 2026-08-13 至 2026-08-13
+									942 按钮 2026-09-13 · 对比期净损益 ¥0.00 · 本期 2026-09-13 至 2026-09-13；对比期 2026-08-13 至 2026-08-13
+								943 文本 2026-09-13
+							944 文本 悬停或选择图形查看精确数据；点击图形查看明细。
+							945 开合三角标记 查看数据与两期明细入口
+								946 文本 查看数据与两期明细入口
+						947 container
+							948 文本 06 / SPENDING DAYS
+							949 标题 支出日历, Value: 2
+								950 文本 支出日历
+							951 文本 月份
+							952 月份选择器 月份
+								953 container
+									954 步进器 (settable, float) 年 月份, Value: 2026, Placeholder: ----
+									955 文本 年
+									956 步进器 (settable, float) 月 月份, Value: 9, Details: 09, Placeholder: --
+									957 文本 月
+								958 弹出式按钮 显示月份选择器
+							959 text 2026-09 · 所选范围内支出 ¥9,990.45 · 点击日期查看当日分类与明细 一 二 三 四 五 六 日
+							960 按钮 2026-09-01 ¥958.30 9 笔
+								961 文本 1
+								962 文本 ¥958.30
+							963 按钮 2026-09-02 ¥986.91 8 笔
+								964 文本 2
+								965 文本 ¥986.91
+							966 按钮 2026-09-03 ¥975.52 7 笔
+								967 文本 3
+								968 文本 ¥975.52
+							969 按钮 2026-09-04 ¥984.13 7 笔
+								970 文本 4
+								971 文本 ¥984.13
+							972 按钮 2026-09-05 ¥992.74 7 笔
+								973 文本 5
+								974 文本 ¥992.74
+							975 按钮 2026-09-06 ¥1,001.35 7 笔
+								976 文本 6
+								977 文本 ¥1,001.35
+							978 按钮 2026-09-07 ¥1,009.96 7 笔
+								979 文本 7
+								980 文本 ¥1,009.96
+							981 按钮 2026-09-08 ¥1,018.57 7 笔
+								982 文本 8
+								983 文本 ¥1,018.57
+							984 按钮 2026-09-09 ¥1,027.18 7 笔
+								985 文本 9
+								986 文本 ¥1,027.18
+							987 按钮 2026-09-10 ¥1,035.79 7 笔
+								988 文本 10
+								989 文本 ¥1,035.79
+							990 按钮 2026-09-11 无记录 0 笔
+								991 文本 11
+								992 文本 无记录
+							993 按钮 2026-09-12 无记录 0 笔
+								994 文本 12
+								995 文本 无记录
+							996 按钮 2026-09-13 无记录 0 笔
+								997 文本 13
+								998 文本 无记录
+							999 按钮 (disabled) 2026-09-14 未来 0 笔
+								1000 文本 14
+								1001 文本 未来
+							1002 按钮 (disabled) 2026-09-15 未来 0 笔
+								1003 文本 15
+								1004 文本 未来
+							1005 按钮 (disabled) 2026-09-16 未来 0 笔
+								1006 文本 16
+								1007 文本 未来
+							1008 按钮 (disabled) 2026-09-17 未来 0 笔
+								1009 文本 17
+								1010 文本 未来
+							1011 按钮 (disabled) 2026-09-18 未来 0 笔
+								1012 文本 18
+								1013 文本 未来
+							1014 按钮 (disabled) 2026-09-19 未来 0 笔
+								1015 文本 19
+								1016 文本 未来
+							1017 按钮 (disabled) 2026-09-20 未来 0 笔
+								1018 文本 20
+								1019 文本 未来
+							1020 按钮 (disabled) 2026-09-21 未来 0 笔
+								1021 文本 21
+								1022 文本 未来
+							1023 按钮 (disabled) 2026-09-22 未来 0 笔
+								1024 文本 22
+								1025 文本 未来
+							1026 按钮 (disabled) 2026-09-23 未来 0 笔
+								1027 文本 23
+								1028 文本 未来
+							1029 按钮 (disabled) 2026-09-24 未来 0 笔
+								1030 文本 24
+								1031 文本 未来
+							1032 按钮 (disabled) 2026-09-25 未来 0 笔
+								1033 文本 25
+								1034 文本 未来
+							1035 按钮 (disabled) 2026-09-26 未来 0 笔
+								1036 文本 26
+								1037 文本 未来
+							1038 按钮 (disabled) 2026-09-27 未来 0 笔
+								1039 文本 27
+								1040 文本 未来
+							1041 按钮 (disabled) 2026-09-28 未来 0 笔
+								1042 文本 28
+								1043 文本 未来
+							1044 按钮 (disabled) 2026-09-29 未来 0 笔
+								1045 文本 29
+								1046 文本 未来
+							1047 按钮 (disabled) 2026-09-30 未来 0 笔
+								1048 文本 30
+								1049 文本 未来
+							1050 文本 浅 → 深：支出由少到多 · 无记录与未来日期独立标示
+						1051 container
+							1052 文本 07 / LONG VIEW
+							1053 标题 近12个月概览, Value: 2
+								1054 文本 近12个月概览
+							1055 文本 2025-10-01 至 2026-09-30 · 独立于本期总额；点击月份切换主范围
+							1056 切换按钮 ▥ 收入, Value: 1
+							1057 切换按钮 ▥ 支出, Value: 1
+							1058 切换按钮 ━ 盈余, Value: 1
+							1059 container 近12个月收支
+								1060 文本 -¥6,940.45
+								1061 文本 ¥19,794.66
+								1062 文本 ¥46,529.77
+								1063 文本 ¥73,264.88
+								1064 文本 ¥100,000.00
+								1065 按钮 2025-10 · 2025-10-01 至 2025-10-31；收入 ¥0.00；支出 ¥0.00；盈余 ¥0.00
+									1066 图形符号
+									1067 图形符号
+									1068 按钮 2025-10 · 盈余 ¥0.00 · 2025-10-01 至 2025-10-31
+								1069 文本 2025-10
+								1070 按钮 2025-11 · 2025-11-01 至 2025-11-30；收入 ¥0.00；支出 ¥0.00；盈余 ¥0.00
+									1071 图形符号
+									1072 图形符号
+									1073 按钮 2025-11 · 盈余 ¥0.00 · 2025-11-01 至 2025-11-30
+								1074 按钮 2025-12 · 2025-12-01 至 2025-12-31；收入 ¥0.00；支出 ¥0.00；盈余 ¥0.00
+									1075 图形符号
+									1076 图形符号
+									1077 按钮 2025-12 · 盈余 ¥0.00 · 2025-12-01 至 2025-12-31
+								1078 按钮 2026-01 · 2026-01-01 至 2026-01-31；收入 ¥100,000.00；支出 ¥0.00；盈余 ¥100,000.00
+									1079 图形符号
+									1080 图形符号
+									1081 按钮 2026-01 · 盈余 ¥100,000.00 · 2026-01-01 至 2026-01-31
+								1082 文本 2026-01
+								1083 按钮 2026-02 · 2026-02-01 至 2026-02-28；收入 ¥0.00；支出 ¥0.00；盈余 ¥0.00
+									1084 图形符号
+									1085 图形符号
+									1086 按钮 2026-02 · 盈余 ¥0.00 · 2026-02-01 至 2026-02-28
+								1087 按钮 2026-03 · 2026-03-01 至 2026-03-31；收入 ¥0.00；支出 ¥0.00；盈余 ¥0.00
+									1088 图形符号
+									1089 图形符号
+									1090 按钮 2026-03 · 盈余 ¥0.00 · 2026-03-01 至 2026-03-31
+								1091 按钮 2026-04 · 2026-04-01 至 2026-04-30；收入 ¥0.00；支出 ¥0.00；盈余 ¥0.00
+									1092 图形符号
+									1093 图形符号
+									1094 按钮 2026-04 · 盈余 ¥0.00 · 2026-04-01 至 2026-04-30
+								1095 文本 2026-04
+								1096 按钮 2026-05 · 2026-05-01 至 2026-05-31；收入 ¥0.00；支出 ¥0.00；盈余 ¥0.00
+									1097 图形符号
+									1098 图形符号
+									1099 按钮 2026-05 · 盈余 ¥0.00 · 2026-05-01 至 2026-05-31
+								1100 按钮 2026-06 · 2026-06-01 至 2026-06-30；收入 ¥0.00；支出 ¥0.00；盈余 ¥0.00
+									1101 图形符号
+									1102 图形符号
+									1103 按钮 2026-06 · 盈余 ¥0.00 · 2026-06-01 至 2026-06-30
+								1104 按钮 2026-07 · 2026-07-01 至 2026-07-31；收入 ¥0.00；支出 ¥0.00；盈余 ¥0.00
+									1105 图形符号
+									1106 图形符号
+									1107 按钮 2026-07 · 盈余 ¥0.00 · 2026-07-01 至 2026-07-31
+								1108 文本 2026-07
+								1109 按钮 2026-08 · 2026-08-01 至 2026-08-31；收入 ¥5,000.00；支出 ¥8,312.99；盈余 -¥3,312.99
+									1110 图形符号
+									1111 图形符号
+									1112 按钮 2026-08 · 盈余 -¥3,312.99 · 2026-08-01 至 2026-08-31
+								1113 按钮 2026-09（未完） · 2026-09-01 至 2026-09-13；收入 ¥3,050.00；支出 ¥9,990.45；盈余 -¥6,940.45
+									1114 图形符号
+									1115 图形符号
+									1116 按钮 2026-09（未完） · 盈余 -¥6,940.45 · 2026-09-01 至 2026-09-13
+							1117 文本 悬停或选择图形查看精确数据；点击图形查看明细。
+							1118 开合三角标记 查看数据与两期明细入口
+								1119 文本 查看数据与两期明细入口
+						1120 标题 交易明细, Value: 2
+							1121 文本 交易明细
+						1122 文本 本期 · 全部交易 · 2026-09-01 至 2026-09-13
+						1123 文本 金额 / 人民币
+						1124 表格
+							1125 row
+								1126 列标题
+									1127 文本 日期
+								1128 列标题
+									1129 文本 方向
+								1130 列标题
+									1131 文本 分类
+								1132 列标题
+									1133 文本 标签
+								1134 列标题
+									1135 文本 金额
+							1136 row
+								1137 单元格
+									1138 文本 2026-09-10
+								1139 单元格
+									1140 文本 支出
+								1141 单元格
+									1142 文本 合成分类11
+								1143 单元格
+									1144 文本 —
+								1145 单元格
+									1146 文本 ¥184.87
+							1147 row
+								1148 单元格
+									1149 文本 2026-09-10
+								1150 单元格
+									1151 文本 支出
+								1152 单元格
+									1153 文本 合成分类15
+								1154 单元格
+									1155 文本 —
+								1156 单元格
+									1157 文本 ¥172.57
+							1158 row
+								1159 单元格
+									1160 文本 2026-09-10
+								1161 单元格
+									1162 文本 支出
+								1163 单元格
+									1164 文本 合成分类12
+								1165 单元格
+									1166 文本 —
+								1167 单元格
+									1168 文本 ¥160.27
+							1169 row
+								1170 单元格
+									1171 文本 2026-09-10
+								1172 单元格
+									1173 文本 支出
+								1174 单元格
+									1175 文本 合成分类16
+								1176 单元格
+									1177 文本 —
+								1178 单元格
+									1179 文本 ¥147.97
+							1180 row
+								1181 单元格
+									1182 文本 2026-09-10
+								1183 单元格
+									1184 文本 支出
+								1185 单元格
+									1186 文本 合成分类13
+								1187 单元格
+									1188 文本 —
+								1189 单元格
+									1190 文本 ¥135.67
+							1191 row
+								1192 单元格
+									1193 文本 2026-09-10
+								1194 单元格
+									1195 文本 支出
+								1196 单元格
+									1197 文本 合成分类10
+								1198 单元格
+									1199 文本 —
+								1200 单元格
+									1201 文本 ¥123.37
+							1202 row
+								1203 单元格
+									1204 文本 2026-09-10
+								1205 单元格
+									1206 文本 支出
+								1207 单元格
+									1208 文本 合成分类14
+								1209 单元格
+									1210 文本 —
+								1211 单元格
+									1212 文本 ¥111.07
+							1213 row
+								1214 单元格
+									1215 文本 2026-09-09
+								1216 单元格
+									1217 文本 支出
+								1218 单元格
+									1219 文本 合成分类10
+								1220 单元格
+									1221 文本 —
+								1222 单元格
+									1223 文本 ¥183.64
+							1224 row
+								1225 单元格
+									1226 文本 2026-09-09
+								1227 单元格
+									1228 文本 支出
+								1229 单元格
+									1230 文本 合成分类14
+								1231 单元格
+									1232 文本 —
+								1233 单元格
+									1234 文本 ¥171.34
+							1235 row
+								1236 单元格
+									1237 文本 2026-09-09
+								1238 单元格
+									1239 文本 支出
+								1240 单元格
+									1241 文本 合成分类11
+								1242 单元格
+									1243 文本 —
+								1244 单元格
+									1245 文本 ¥159.04
+							1246 row
+								1247 单元格
+									1248 文本 2026-09-09
+								1249 单元格
+									1250 文本 支出
+								1251 单元格
+									1252 文本 合成分类15
+								1253 单元格
+									1254 文本 —
+								1255 单元格
+									1256 文本 ¥146.74
+							1257 row
+								1258 单元格
+									1259 文本 2026-09-09
+								1260 单元格
+									1261 文本 支出
+								1262 单元格
+									1263 文本 合成分类12
+								1264 单元格
+									1265 文本 —
+								1266 单元格
+									1267 文本 ¥134.44
+							1268 row
+								1269 单元格
+									1270 文本 2026-09-09
+								1271 单元格
+									1272 文本 支出
+								1273 单元格
+									1274 文本 合成分类16
+								1275 单元格
+									1276 文本 —
+								1277 单元格
+									1278 文本 ¥122.14
+							1279 row
+								1280 单元格
+									1281 文本 2026-09-09
+								1282 单元格
+									1283 文本 支出
+								1284 单元格
+									1285 文本 合成分类13
+								1286 单元格
+									1287 文本 —
+								1288 单元格
+									1289 文本 ¥109.84
+							1290 row
+								1291 单元格
+									1292 文本 2026-09-08
+								1293 单元格
+									1294 文本 支出
+								1295 单元格
+									1296 文本 合成分类16
+								1297 单元格
+									1298 文本 —
+								1299 单元格
+									1300 文本 ¥182.41
+							1301 row
+								1302 单元格
+									1303 文本 2026-09-08
+								1304 单元格
+									1305 文本 支出
+								1306 单元格
+									1307 文本 合成分类13
+								1308 单元格
+									1309 文本 —
+								1310 单元格
+									1311 文本 ¥170.11
+							1312 row
+								1313 单元格
+									1314 文本 2026-09-08
+								1315 单元格
+									1316 文本 支出
+								1317 单元格
+									1318 文本 合成分类10
+								1319 单元格
+									1320 文本 —
+								1321 单元格
+									1322 文本 ¥157.81
+							1323 row
+								1324 单元格
+									1325 文本 2026-09-08
+								1326 单元格
+									1327 文本 支出
+								1328 单元格
+									1329 文本 合成分类14
+								1330 单元格
+									1331 文本 —
+								1332 单元格
+									1333 文本 ¥145.51
+							1334 row
+								1335 单元格
+									1336 文本 2026-09-08
+								1337 单元格
+									1338 文本 支出
+								1339 单元格
+									1340 文本 合成分类11
+								1341 单元格
+									1342 文本 —
+								1343 单元格
+									1344 文本 ¥133.21
+							1345 row
+								1346 单元格
+									1347 文本 2026-09-08
+								1348 单元格
+									1349 文本 支出
+								1350 单元格
+									1351 文本 合成分类15
+								1352 单元格
+									1353 文本 —
+								1354 单元格
+									1355 文本 ¥120.91
+							1356 row
+								1357 单元格
+									1358 文本 2026-09-08
+								1359 单元格
+									1360 文本 支出
+								1361 单元格
+									1362 文本 合成分类12
+								1363 单元格
+									1364 文本 —
+								1365 单元格
+									1366 文本 ¥108.61
+							1367 row
+								1368 单元格
+									1369 文本 2026-09-07
+								1370 单元格
+									1371 文本 支出
+								1372 单元格
+									1373 文本 合成分类15
+								1374 单元格
+									1375 文本 —
+								1376 单元格
+									1377 文本 ¥181.18
+							1378 row
+								1379 单元格
+									1380 文本 2026-09-07
+								1381 单元格
+									1382 文本 支出
+								1383 单元格
+									1384 文本 合成分类12
+								1385 单元格
+									1386 文本 —
+								1387 单元格
+									1388 文本 ¥168.88
+							1389 row
+								1390 单元格
+									1391 文本 2026-09-07
+								1392 单元格
+									1393 文本 支出
+								1394 单元格
+									1395 文本 合成分类16
+								1396 单元格
+									1397 文本 —
+								1398 单元格
+									1399 文本 ¥156.58
+							1400 row
+								1401 单元格
+									1402 文本 2026-09-07
+								1403 单元格
+									1404 文本 支出
+								1405 单元格
+									1406 文本 合成分类13
+								1407 单元格
+									1408 文本 —
+								1409 单元格
+									1410 文本 ¥144.28
+							1411 row
+								1412 单元格
+									1413 文本 2026-09-07
+								1414 单元格
+									1415 文本 支出
+								1416 单元格
+									1417 文本 合成分类10
+								1418 单元格
+									1419 文本 —
+								1420 单元格
+									1421 文本 ¥131.98
+							1422 row
+								1423 单元格
+									1424 文本 2026-09-07
+								1425 单元格
+									1426 文本 支出
+								1427 单元格
+									1428 文本 合成分类14
+								1429 单元格
+									1430 文本 —
+								1431 单元格
+									1432 文本 ¥119.68
+							1433 row
+								1434 单元格
+									1435 文本 2026-09-07
+								1436 单元格
+									1437 文本 支出
+								1438 单元格
+									1439 文本 合成分类11
+								1440 单元格
+									1441 文本 —
+								1442 单元格
+									1443 文本 ¥107.38
+							1444 row
+								1445 单元格
+									1446 文本 2026-09-06
+								1447 单元格
+									1448 文本 支出
+								1449 单元格
+									1450 文本 合成分类14
+								1451 单元格
+									1452 文本 —
+								1453 单元格
+									1454 文本 ¥179.95
+							1455 row
+								1456 单元格
+									1457 文本 2026-09-06
+								1458 单元格
+									1459 文本 支出
+								1460 单元格
+									1461 文本 合成分类11
+								1462 单元格
+									1463 文本 —
+								1464 单元格
+									1465 文本 ¥167.65
+							1466 row
+								1467 单元格
+									1468 文本 2026-09-06
+								1469 单元格
+									1470 文本 支出
+								1471 单元格
+									1472 文本 合成分类15
+								1473 单元格
+									1474 文本 —
+								1475 单元格
+									1476 文本 ¥155.35
+							1477 row
+								1478 单元格
+									1479 文本 2026-09-06
+								1480 单元格
+									1481 文本 支出
+								1482 单元格
+									1483 文本 合成分类12
+								1484 单元格
+									1485 文本 —
+								1486 单元格
+									1487 文本 ¥143.05
+							1488 row
+								1489 单元格
+									1490 文本 2026-09-06
+								1491 单元格
+									1492 文本 支出
+								1493 单元格
+									1494 文本 合成分类16
+								1495 单元格
+									1496 文本 —
+								1497 单元格
+									1498 文本 ¥130.75
+							1499 row
+								1500 单元格
+									1501 文本 2026-09-06
+								1502 单元格
+									1503 文本 支出
+								1504 单元格
+									1505 文本 合成分类13
+								1506 单元格
+									1507 文本 —
+								1508 单元格
+									1509 文本 ¥118.45
+							1510 row
+								1511 单元格
+									1512 文本 2026-09-06
+								1513 单元格
+									1514 文本 支出
+								1515 单元格
+									1516 文本 合成分类10
+								1517 单元格
+									1518 文本 —
+								1519 单元格
+									1520 文本 ¥106.15
+							1521 row
+								1522 单元格
+									1523 文本 2026-09-05
+								1524 单元格
+									1525 文本 支出
+								1526 单元格
+									1527 文本 合成分类13
+								1528 单元格
+									1529 文本 —
+								1530 单元格
+									1531 文本 ¥178.72
+							1532 row
+								1533 单元格
+									1534 文本 2026-09-05
+								1535 单元格
+									1536 文本 支出
+								1537 单元格
+									1538 文本 合成分类10
+								1539 单元格
+									1540 文本 —
+								1541 单元格
+									1542 文本 ¥166.42
+							1543 row
+								1544 单元格
+									1545 文本 2026-09-05
+								1546 单元格
+									1547 文本 支出
+								1548 单元格
+									1549 文本 合成分类14
+								1550 单元格
+									1551 文本 —
+								1552 单元格
+									1553 文本 ¥154.12
+							1554 row
+								1555 单元格
+									1556 文本 2026-09-05
+								1557 单元格
+									1558 文本 支出
+								1559 单元格
+									1560 文本 合成分类11
+								1561 单元格
+									1562 文本 —
+								1563 单元格
+									1564 文本 ¥141.82
+							1565 row
+								1566 单元格
+									1567 文本 2026-09-05
+								1568 单元格
+									1569 文本 支出
+								1570 单元格
+									1571 文本 合成分类15
+								1572 单元格
+									1573 文本 —
+								1574 单元格
+									1575 文本 ¥129.52
+							1576 row
+								1577 单元格
+									1578 文本 2026-09-05
+								1579 单元格
+									1580 文本 支出
+								1581 单元格
+									1582 文本 合成分类12
+								1583 单元格
+									1584 文本 —
+								1585 单元格
+									1586 文本 ¥117.22
+							1587 row
+								1588 单元格
+									1589 文本 2026-09-05
+								1590 单元格
+									1591 文本 支出
+								1592 单元格
+									1593 文本 合成分类16
+								1594 单元格
+									1595 文本 —
+								1596 单元格
+									1597 文本 ¥104.92
+							1598 row
+								1599 单元格
+									1600 文本 2026-09-04
+								1601 单元格
+									1602 文本 支出
+								1603 单元格
+									1604 文本 合成分类12
+								1605 单元格
+									1606 文本 —
+								1607 单元格
+									1608 文本 ¥177.49
+							1609 row
+								1610 单元格
+									1611 文本 2026-09-04
+								1612 单元格
+									1613 文本 支出
+								1614 单元格
+									1615 文本 合成分类16
+								1616 单元格
+									1617 文本 —
+								1618 单元格
+									1619 文本 ¥165.19
+							1620 row
+								1621 单元格
+									1622 文本 2026-09-04
+								1623 单元格
+									1624 文本 支出
+								1625 单元格
+									1626 文本 合成分类13
+								1627 单元格
+									1628 文本 —
+								1629 单元格
+									1630 文本 ¥152.89
+							1631 row
+								1632 单元格
+									1633 文本 2026-09-04
+								1634 单元格
+									1635 文本 支出
+								1636 单元格
+									1637 文本 合成分类10
+								1638 单元格
+									1639 文本 —
+								1640 单元格
+									1641 文本 ¥140.59
+							1642 row
+								1643 单元格
+									1644 文本 2026-09-04
+								1645 单元格
+									1646 文本 支出
+								1647 单元格
+									1648 文本 合成分类14
+								1649 单元格
+									1650 文本 —
+								1651 单元格
+									1652 文本 ¥128.29
+							1653 row
+								1654 单元格
+									1655 文本 2026-09-04
+								1656 单元格
+									1657 文本 支出
+								1658 单元格
+									1659 文本 合成分类11
+								1660 单元格
+									1661 文本 —
+								1662 单元格
+									1663 文本 ¥115.99
+							1664 row
+								1665 单元格
+									1666 文本 2026-09-04
+								1667 单元格
+									1668 文本 支出
+								1669 单元格
+									1670 文本 合成分类15
+								1671 单元格
+									1672 文本 —
+								1673 单元格
+									1674 文本 ¥103.69
+							1675 row
+								1676 单元格
+									1677 文本 2026-09-03
+								1678 单元格
+									1679 文本 支出
+								1680 单元格
+									1681 文本 合成分类11
+								1682 单元格
+									1683 文本 —
+								1684 单元格
+									1685 文本 ¥176.26
+						1686 按钮 加载更多
+						1687 文本 已显示 50 / 73 笔
+						1688 开合三角标记 运行诊断
+							1689 文本 运行诊断
+						1690 文本 最近读取并渲染 61.3ms · 自动刷新 0 次 · 版本 8b413f97fffa4c3e8f33ebf7b327d901:135d1b23b4d99a0e
+						1691 文本 视口 390px · 页面宽度 390px
+						1692 text 账单监控站 本机只读 · 数据自动同步 · 上海时区
+			1693 container 信息栏容器
+				1694 container 信息栏
+					1695 container
+						1696 文本 “OpenCLI”已开始调试此浏览器
+						1697 按钮 取消
+					1698 按钮 关闭
+			1699 弹出式按钮 标签页搜索
+			1700 container
+				1701 标签组
+					1702 标签 (settable, boolean) Description: 主页 / X - 内存用量 - 245 MB, Value: off
+						1703 按钮 关闭
+					1704 标签 (settable, boolean) Description: xteam | Raft - 内存用量 - 231 MB, Value: off
+						1705 按钮 关闭
+					1706 标签 (settable, boolean) Description: 账单监控站 - 内存用量 - 111 MB, Value: off
+						1707 按钮 关闭
+					1708 标签 (settable, boolean) Description: CLI Proxy API Management Center - 内存用量 - 65.6 MB, Value: off
+						1709 按钮 关闭
+					1710 标签 (selected, settable, boolean) Description: 账单监控站 - 内存用量 - 171 MB, Value: on
+						1711 按钮 关闭
+			1712 按钮 新标签页
+			1713 按钮 打开 Chrome 中的 Gemini
+	1714 关闭按钮
+	1715 全屏幕按钮 Help: 此按钮也可以执行缩放窗口的操作, Secondary Actions: 缩放窗口
+	1716 最小化按钮
+1717 menu bar
+	1718 Chrome
+	1719 文件
+	1720 编辑
+	1721 显示
+	1722 历史记录
+	1723 书签
+	1724 个人资料
+	1725 标签页
+	1726 窗口
+	1727 帮助
+
+The focused UI element is 1688 开合三角标记 运行诊断

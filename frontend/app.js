@@ -292,6 +292,7 @@ function renderDetail(data,append){
   renderRows(data?.transactions||[],append);state.cursor=data?.next_cursor||null;state.renderedRows=append?state.renderedRows+(data?.transactions.length||0):(data?.transactions.length||0);
   $('#more').disabled=!state.cursor;$('#page-meta').textContent=`已显示 ${state.renderedRows} / ${data?.filtered_count||0} 笔`;
   const d=state.detail;$('#detail-context').textContent=`${d?.period||'本期'} · ${d?.label||'全部交易'} · ${rangeText(d?.range||state.data.scope)}${d?.nature?` · 性质 ${d.nature}`:''}`;
+  if(d&&['nature','direction'].some(key=>d[key]&&$('#'+key).value&&d[key]!==$('#'+key).value))$('#detail-context').textContent+=' · 与全局筛选无交集';
   $('#detail-back').hidden=!state.history.length;$('#detail-clear').hidden=!d;
   if(d?.calendar&&data){const parent=$('#categories');parent.replaceChildren();add(parent,'h3',`${d.range.start} · 当日分类`);for(const c of data.categories){action(parent,`${c.name} · ${money(c.cents)} · ${c.count} 笔`,()=>selectDetail({...d,category:c.code,group:c.group_code,label:`${d.range.start} / ${c.name}`,calendar:false}),'rank-row');}}
 }
@@ -331,3 +332,8 @@ $('#reset').addEventListener('click',()=>{$('#kind').value='month';$('#value').v
 async function poll(){if(document.hidden||state.polling||document.querySelector('main').getAttribute('aria-busy')==='true')return;state.polling=true;try{const probe=await get('/api/version');if(probe.version!==state.version)await load({refresh:true});}catch(e){$('#status').textContent=e.message;}finally{state.polling=false;}}
 setInterval(poll,2000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)poll();});
 load();
+
+const showViewport = () => { let el=document.querySelector('#viewport-info'); if(!el){el=add(document.querySelector('.diagnostics'),'p');el.id='viewport-info';} el.textContent=`视口 ${document.documentElement.clientWidth}px · 页面宽度 ${document.documentElement.scrollWidth}px`; };
+window.addEventListener('resize',showViewport);showViewport();
+let resizeTimer;
+window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{if(state.data){renderTrends(state.data);renderChanges(state.data);renderDaily(state.data);renderLong(state.data);}showViewport();},120);});

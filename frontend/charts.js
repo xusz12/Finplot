@@ -35,7 +35,7 @@ window.LedgerCharts = (() => {
     let low = values.reduce((a,b) => b < a ? b : a, 0n), high = values.reduce((a,b) => b > a ? b : a, 0n);
     if (low === high) high = low + 100n;
     const span = high - low;
-    const width = Math.max(560, container.clientWidth, points.length * Math.max(24, shown.length * 10) + 100);
+    const width = Math.max(300, container.clientWidth, points.length * Math.max(24, shown.length * 10) + 100);
     const y = v => 218 - Number((BigInt(v) - low) * 19000n / span) / 100;
     const svg = node(scroll, 'svg', {viewBox: `0 0 ${width} 268`, width, height: 268, role: 'group', 'aria-label': label, class: 'analytics-svg'});
     for (let i = 0; i <= 4; i++) {
@@ -86,7 +86,7 @@ window.LedgerCharts = (() => {
   function horizontal(container, items, onSelect) {
     container.replaceChildren();
     if (!items.length) return;
-    const width = Math.max(520, container.clientWidth), height = items.length * 48 + 38;
+    const width = Math.max(360, container.clientWidth), height = items.length * 48 + 38;
     const scroll = document.createElement('div'); scroll.className = 'plot-scroll'; container.append(scroll);
     const svg = node(scroll,'svg',{viewBox:`0 0 ${width} ${height}`,width,height,class:'analytics-svg',role:'group','aria-label':'分类金额增减，左侧减少、右侧增加'});
     const center = 175 + (width - 190) / 2, extent = (width - 220) / 2;
