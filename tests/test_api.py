@@ -240,7 +240,7 @@ class ObservatoryApiTests(unittest.TestCase):
                 }).status_code,
                 403,
             )
-        for invalid_host in ("*.ts.net", "a..b.example", "a,b.example", "a.example:443"):
+        for invalid_host in ("*.ts.net", "a..b.example", "a,b.example", "a.example:443", "a.example:", "[2001:db8::7]:"):
             with self.subTest(invalid_host=invalid_host), patch.dict(os.environ, {"FINPLOT_PUBLIC_HOST": invalid_host}):
                 self.assertEqual(
                     self.client.get("/api/version", headers={
@@ -249,6 +249,34 @@ class ObservatoryApiTests(unittest.TestCase):
                     }).status_code,
                     403,
                 )
+
+        # A bracketed IPv6 literal without a port is valid; an empty port is
+        # not.  This guards the parser distinction used by Host and config.
+        with patch.dict(os.environ, {"FINPLOT_PUBLIC_HOST": "[2001:db8::7]"}):
+            self.assertEqual(
+                self.client.get("/api/version", headers={
+                    "host": "[2001:db8::7]",
+                    "x-forwarded-proto": "https",
+                    "origin": "https://[2001:db8::7]",
+                }).status_code,
+                200,
+            )
+            self.assertEqual(
+                self.client.get("/api/version", headers={
+                    "host": "[2001:db8::7]:",
+                    "x-forwarded-proto": "https",
+                    "origin": "https://[2001:db8::7]",
+                }).status_code,
+                403,
+            )
+            self.assertEqual(
+                self.client.get("/api/version", headers={
+                    "host": "[2001:db8::7]",
+                    "x-forwarded-proto": "https",
+                    "origin": "https://[2001:db8::7]:",
+                }).status_code,
+                403,
+            )
 
     def test_version_changes_for_writes_and_initial_load_is_valid(self):
         query = {"kind": "month", "value": "2026-09"}

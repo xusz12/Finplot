@@ -255,6 +255,11 @@ def parse_host_header(value: str | None) -> tuple[str, int | None] | None:
     """Parse an HTTP Host value without accepting URL/path syntax."""
     if not value or value != value.strip() or any(char in value for char in "\r\n"):
         return None
+    # ``urlsplit`` normalises an empty port (``example.test:`` or
+    # ``[2001:db8::1]:``) to ``None``.  Keep that distinct from a host with
+    # no port; bracketed IPv6 without a suffix remains valid.
+    if value.endswith(":"):
+        return None
     try:
         parts = urlsplit(f"//{value}")
         hostname = parts.hostname
@@ -410,6 +415,7 @@ def same_origin(origin: str, target: tuple[str, str, int]) -> bool:
         origin_parts = urlsplit(origin)
         scheme, host, port = target
         return (origin_parts.scheme.lower() in {"http", "https"}
+                and not origin_parts.netloc.endswith(":")
                 and not origin_parts.username and not origin_parts.password
                 and origin_parts.path in {"", "/"} and not origin_parts.query and not origin_parts.fragment
                 and origin_parts.hostname is not None
