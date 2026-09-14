@@ -150,6 +150,25 @@ class ObservatoryApiTests(unittest.TestCase):
             self.assertEqual(
                 proxy.get("/api/version", headers=[
                     ("host", "127.0.0.1:8766"),
+                    ("host", "evil.test"),
+                    ("x-forwarded-host", f"{public_host}:443"),
+                    ("x-forwarded-proto", "https"),
+                ]).status_code,
+                403,
+            )
+            self.assertEqual(
+                proxy.get("/api/version", headers=[
+                    ("host", "127.0.0.1:8766"),
+                    ("x-forwarded-host", f"{public_host}:443"),
+                    ("x-forwarded-proto", "https"),
+                    ("origin", f"https://{public_host}"),
+                    ("origin", "https://evil.test"),
+                ]).status_code,
+                403,
+            )
+            self.assertEqual(
+                proxy.get("/api/version", headers=[
+                    ("host", "127.0.0.1:8766"),
                     ("x-forwarded-host", f"{public_host}:443"),
                     ("x-forwarded-proto", "https"),
                     ("x-forwarded-proto", "http"),
