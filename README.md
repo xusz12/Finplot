@@ -103,7 +103,7 @@ LEDGER_DB=/tmp/finplot-demo.sqlite3 \
 - `GET /api/version`：返回数据集版本指纹，用于检测刷新。
 - `/docs`：本地 API 文档。
 
-接口对所有 `*_cents` 字段返回十进制字符串；过期的 `version` 或 `if_version` 返回 `409`，无效组合返回 `422`。响应使用 `Cache-Control: no-store`；服务限制 loopback Host、显式 Tailscale Host、同源 Origin 和同源 CSP。请求日志不记录查询参数或交易数据。代理模式只接受来自 loopback 对端的 `X-Forwarded-Host`/`X-Forwarded-Proto`，不接受标准 `Forwarded` 或非 loopback 伪造转发头。
+接口对所有 `*_cents` 字段返回十进制字符串；过期的 `version` 或 `if_version` 返回 `409`，无效组合返回 `422`。响应使用 `Cache-Control: no-store`；服务限制 loopback Host、显式 Tailscale Host、同源 Origin 和同源 CSP。请求日志不记录查询参数或交易数据。代理模式只接受来自 loopback 对端的单值 `X-Forwarded-Host`/`X-Forwarded-Proto`；若存在 `X-Forwarded-For`，也必须是单个合法 IP。重复、多值、未知或格式异常的转发头，以及标准 `Forwarded` 和非 loopback 伪造转发头，均会被拒绝。
 
 真实账本只允许只读查询。测试、刷新竞争和接口验证必须使用隔离的临时 SQLite 数据库；不得执行迁移、写入、删除、重置真实数据库，也不得将真实账本、密钥、个人配置或敏感证据提交到 Git。
 

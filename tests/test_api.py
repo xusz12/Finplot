@@ -101,6 +101,10 @@ class ObservatoryApiTests(unittest.TestCase):
             }
             self.assertEqual(proxy.get("/api/version", headers=forwarded).status_code, 200)
             self.assertEqual(
+                proxy.get("/api/version", headers={**forwarded, "x-forwarded-for": "100.64.0.20"}).status_code,
+                200,
+            )
+            self.assertEqual(
                 proxy.get("/api/version", headers={
                     "host": "127.0.0.1:8766",
                     "x-forwarded-proto": "https",
@@ -135,7 +139,47 @@ class ObservatoryApiTests(unittest.TestCase):
                 403,
             )
             self.assertEqual(
+                proxy.get("/api/version", headers=[
+                    ("host", "127.0.0.1:8766"),
+                    ("x-forwarded-host", f"{public_host}:443"),
+                    ("x-forwarded-host", "evil.test"),
+                    ("x-forwarded-proto", "https"),
+                ]).status_code,
+                403,
+            )
+            self.assertEqual(
+                proxy.get("/api/version", headers=[
+                    ("host", "127.0.0.1:8766"),
+                    ("x-forwarded-host", f"{public_host}:443"),
+                    ("x-forwarded-proto", "https"),
+                    ("x-forwarded-proto", "http"),
+                ]).status_code,
+                403,
+            )
+            self.assertEqual(
+                proxy.get("/api/version", headers=[
+                    ("host", "127.0.0.1:8766"),
+                    ("x-forwarded-host", f"{public_host}:443"),
+                    ("x-forwarded-proto", "https"),
+                    ("x-forwarded-for", "203.0.113.10"),
+                    ("x-forwarded-for", "not-an-ip"),
+                ]).status_code,
+                403,
+            )
+            self.assertEqual(
+                proxy.get("/api/version", headers={**forwarded, "x-forwarded-for": "203.0.113.10, 198.51.100.20"}).status_code,
+                403,
+            )
+            self.assertEqual(
+                proxy.get("/api/version", headers={**forwarded, "x-forwarded-for": "not-an-ip"}).status_code,
+                403,
+            )
+            self.assertEqual(
                 proxy.get("/api/version", headers={**forwarded, "forwarded": f"host={public_host};proto=https"}).status_code,
+                403,
+            )
+            self.assertEqual(
+                proxy.get("/api/version", headers={**forwarded, "x-forwarded-port": "443"}).status_code,
                 403,
             )
 

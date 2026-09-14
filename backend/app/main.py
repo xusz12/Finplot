@@ -299,21 +299,25 @@ def is_loopback_peer(request: Request) -> bool:
 
 
 def single_header(request: Request, name: str) -> tuple[bool, str | None]:
-    """Read one proxy header and reject comma-joined or empty values."""
-    raw = request.headers.get(name)
-    if raw is None:
+    """Read one header and reject duplicate, comma-joined, or empty values."""
+    values = request.headers.getlist(name)
+    if not values:
         return False, None
+    if len(values) != 1:
+        return True, None
+    raw = values[0]
     value = raw.strip()
     if not value or "," in value or any(char in value for char in "\r\n"):
         return True, None
     return True, value
 
 
-def has_forwarded_headers(request: Request) -> bool:
-    return any(
-        name.lower() == "forwarded" or name.lower().startswith("x-forwarded-")
-        for name in request.headers.keys()
-    )
+def valid_forwarded_for(value: str) -> bool:
+    try:
+        ipaddress.ip_address(value)
+    except ValueError:
+        return False
+    return True
 
 
 def request_target(request: Request) -> tuple[str, str, int] | None:
@@ -324,12 +328,19 @@ def request_target(request: Request) -> tuple[str, str, int] | None:
     those headers are considered only when the immediate peer is loopback and
     the host is the exact configured ``FINPLOT_PUBLIC_HOST``.
     """
-    host_parts = parse_host_header(request.headers.get("host"))
+    host_present, host_value = single_header(request, "host")
+    if not host_present or host_value is None:
+        return None
+    host_parts = parse_host_header(host_value)
     if host_parts is None:
         return None
     host, port = host_parts
     peer_is_loopback = is_loopback_peer(request)
-    forwarded_present = has_forwarded_headers(request)
+    forwarded_names = {name.lower() for name in request.headers.keys()
+                       if name.lower() == "forwarded" or name.lower().startswith("x-forwarded-")}
+    if not forwarded_names.issubset({"x-forwarded-for", "x-forwarded-host", "x-forwarded-proto"}):
+        return None
+    forwarded_present = bool(forwarded_names)
     if forwarded_present and not peer_is_loopback:
         return None
     # Standard Forwarded syntax is not needed by the Tailscale Serve contract;
@@ -337,6 +348,9 @@ def request_target(request: Request) -> tuple[str, str, int] | None:
     if request.headers.get("forwarded") is not None:
         return None
 
+    forwarded_for_present, forwarded_for = single_header(request, "x-forwarded-for")
+    if forwarded_for_present and (forwarded_for is None or not valid_forwarded_for(forwarded_for)):
+        return None
     forwarded_host_present, forwarded_host_raw = single_header(request, "x-forwarded-host")
     forwarded_proto_present, forwarded_proto = single_header(request, "x-forwarded-proto")
     if (forwarded_host_present and forwarded_host_raw is None) or (
@@ -421,7 +435,9 @@ app.add_middleware(CORSMiddleware, allow_origins=[], allow_methods=[], allow_hea
 @app.middleware("http")
 async def privacy_headers(request: Request, call_next):
     target = request_target(request)
-    origin = request.headers.get("origin")
+    origin_present, origin = single_header(request, "origin")
+    if origin_present and origin is None:
+        return JSONResponse({"detail": "same-origin required"}, status_code=403)
     if target is None:
         return JSONResponse({"detail": "loopback host required"}, status_code=403)
     if origin and not same_origin(origin, target):

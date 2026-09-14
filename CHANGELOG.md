@@ -10,7 +10,7 @@ Finplot 的完整发布历史集中记录于此；使用方法和当前稳定版
 - 明确原稳定目录的合成演示实例继续使用 `8765`，真实账本只读实例使用 `8766`，避免误停现有服务。
 - 将 README 全量改为中文，补充项目用途、安装启动、v1/v2 目录、端口、真实账本只读边界、验证和升级规则入口。
 - 补充源码与运行数据的 Git 边界说明。
-- v0.1.1 后端通过显式 `FINPLOT_PUBLIC_HOST` 支持指定 Tailscale Serve 主机，默认仍只允许 loopback；仅信任 loopback 代理转发的 HTTPS Host/Origin，并拒绝非 loopback 或伪造转发头。
+- v0.1.1 后端通过显式 `FINPLOT_PUBLIC_HOST` 支持指定 Tailscale Serve 主机，默认仍只允许 loopback；仅信任 loopback 代理转发的 HTTPS Host/Origin，要求转发头单值且格式有效，并拒绝重复、多值、未知、非 loopback 或伪造转发头。
 - 新增 `scripts/start-finplot.sh` 手动前台启动脚本：固定绑定 `127.0.0.1`、要求 `LEDGER_DB`、支持独立 `FINPLOT_PORT`，不安装或配置 launchd。
 
 ## [v0.1.0] - 2026-09-14
