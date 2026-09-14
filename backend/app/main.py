@@ -34,6 +34,7 @@ GRAIN_VALUES = {"day", "month", "quarter", "half", "year"}
 COMPARE_VALUES = {"previous", "year_ago", "custom", "none"}
 LOOPBACK_HOSTS = {"127.0.0.1", "localhost", "::1"}
 PUBLIC_HOST_ENV = "FINPLOT_PUBLIC_HOST"
+PUBLIC_HOST = "xmac-mini-1.tailef8d6d.ts.net"
 SHANGHAI = ZoneInfo("Asia/Shanghai")
 
 
@@ -274,13 +275,13 @@ def configured_public_host() -> str | None:
     there is no wildcard or implicit ``*.ts.net`` trust.
     """
     raw = os.environ.get(PUBLIC_HOST_ENV, "")
-    if not raw or raw != raw.strip() or "," in raw:
+    if raw != PUBLIC_HOST:
         return None
-    parsed = parse_host_header(raw.lower())
+    parsed = parse_host_header(PUBLIC_HOST)
     if parsed is None:
         return None
     hostname, port = parsed
-    if port is not None or hostname in LOOPBACK_HOSTS or hostname != raw.lower():
+    if port is not None or hostname in LOOPBACK_HOSTS:
         return None
     return hostname
 

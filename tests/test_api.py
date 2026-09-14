@@ -222,6 +222,14 @@ class ObservatoryApiTests(unittest.TestCase):
                 }).status_code,
                 403,
             )
+        with patch.dict(os.environ, {"FINPLOT_PUBLIC_HOST": "evil.example"}):
+            self.assertEqual(
+                self.client.get("/api/version", headers={
+                    "host": "evil.example",
+                    "x-forwarded-proto": "https",
+                }).status_code,
+                403,
+            )
 
     def test_version_changes_for_writes_and_initial_load_is_valid(self):
         query = {"kind": "month", "value": "2026-09"}
