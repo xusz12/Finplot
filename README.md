@@ -42,7 +42,7 @@ LEDGER_DB=/absolute/path/to/ledger.sqlite3 \
 
 ### v0.1.1 私网代理与手动启动脚本
 
-v0.1.1 保持应用只绑定 `127.0.0.1`。Tailscale Serve 在 HTTPS `443` 终止后转发到这个 loopback 服务；Finplot 只在请求的直接对端也是 loopback 时信任 `X-Forwarded-Host` 和 `X-Forwarded-Proto`，并且只接受显式配置的完整主机名。当前批准且硬性固定的主机名是 `xmac-mini-1.tailef8d6d.ts.net`；不接受任意 `.ts.net` 后缀或其他配置值、其他 Host 或伪造的转发头。Origin 也必须与实际的 HTTP/HTTPS Host 和端口完全同源。未设置或设置为其他值时，外部代理访问保持关闭，loopback 页面仍可用。
+v0.1.1 保持应用只绑定 `127.0.0.1`。Tailscale Serve 在 HTTPS `443` 终止后转发到这个 loopback 服务；Finplot 只在请求的直接对端也是 loopback 时信任 `X-Forwarded-Host` 和 `X-Forwarded-Proto`，并且只接受操作者通过 `FINPLOT_PUBLIC_HOST` 显式设置的一个完整主机名。当前正式部署配置为 `xmac-mini-1.tailef8d6d.ts.net`；程序不自动信任所有 `.ts.net`，也不接受通配符、多主机、端口或格式异常配置。请求 Host 必须精确匹配该配置值，Origin 也必须与实际的 HTTP/HTTPS Host 和端口完全同源。未配置或配置无效时，外部代理访问保持关闭，loopback 页面仍可用。
 
 `scripts/start-finplot.sh` 是手动前台启动脚本。它固定绑定 `127.0.0.1`、默认端口 `8766`、关闭访问日志，并要求调用者显式提供 `LEDGER_DB`。它不会安装或配置 launchd，也不会配置 Tailscale；终端保持运行，按 `Ctrl-C` 停止。
 

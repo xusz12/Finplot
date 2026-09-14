@@ -227,9 +227,28 @@ class ObservatoryApiTests(unittest.TestCase):
                 self.client.get("/api/version", headers={
                     "host": "evil.example",
                     "x-forwarded-proto": "https",
+                    "origin": "https://evil.example",
+                }).status_code,
+                200,
+            )
+            self.assertEqual(
+                self.client.get("/api/version", headers={
+                    "host": "xmac-mini-1.tailef8d6d.ts.net",
+                    "x-forwarded-host": "xmac-mini-1.tailef8d6d.ts.net",
+                    "x-forwarded-proto": "https",
+                    "origin": "https://xmac-mini-1.tailef8d6d.ts.net",
                 }).status_code,
                 403,
             )
+        for invalid_host in ("*.ts.net", "a..b.example", "a,b.example", "a.example:443"):
+            with self.subTest(invalid_host=invalid_host), patch.dict(os.environ, {"FINPLOT_PUBLIC_HOST": invalid_host}):
+                self.assertEqual(
+                    self.client.get("/api/version", headers={
+                        "host": invalid_host,
+                        "x-forwarded-proto": "https",
+                    }).status_code,
+                    403,
+                )
 
     def test_version_changes_for_writes_and_initial_load_is_valid(self):
         query = {"kind": "month", "value": "2026-09"}
