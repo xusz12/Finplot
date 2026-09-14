@@ -251,9 +251,14 @@ def effective_port(scheme: str, port: int | None) -> int:
     return port or (443 if scheme.lower() == "https" else 80)
 
 
+def has_forbidden_authority_chars(value: str) -> bool:
+    """Reject whitespace and C0/DEL controls before URL parsing can normalize them."""
+    return any(char.isspace() or ord(char) < 0x20 or ord(char) == 0x7F for char in value)
+
+
 def parse_host_header(value: str | None) -> tuple[str, int | None] | None:
     """Parse an HTTP Host value without accepting URL/path syntax."""
-    if (not value or value != value.strip() or any(char in value for char in "\r\n")
+    if (not value or value != value.strip() or has_forbidden_authority_chars(value)
             or "?" in value or "#" in value):
         return None
     # ``urlsplit`` normalises an empty port (``example.test:`` or
@@ -322,10 +327,9 @@ def single_header(request: Request, name: str) -> tuple[bool, str | None]:
     if len(values) != 1:
         return True, None
     raw = values[0]
-    value = raw.strip()
-    if not value or "," in value or any(char in value for char in "\r\n"):
+    if not raw or "," in raw or has_forbidden_authority_chars(raw):
         return True, None
-    return True, value
+    return True, raw
 
 
 def valid_forwarded_for(value: str) -> bool:
@@ -412,7 +416,7 @@ def request_target(request: Request) -> tuple[str, str, int] | None:
 
 
 def same_origin(origin: str, target: tuple[str, str, int]) -> bool:
-    if "?" in origin or "#" in origin:
+    if has_forbidden_authority_chars(origin) or "?" in origin or "#" in origin:
         return False
     try:
         origin_parts = urlsplit(origin)
