@@ -263,7 +263,24 @@ class ObservatoryApiTests(unittest.TestCase):
             )
             self.assertEqual(
                 self.client.get("/api/version", headers={
+                    "host": "[2001:db8::7]:443",
+                    "x-forwarded-proto": "https",
+                    "origin": "https://[2001:db8::7]:443",
+                }).status_code,
+                200,
+            )
+            self.assertEqual(
+                self.client.get("/api/version", headers={
                     "host": "[2001:db8::7]:",
+                    "x-forwarded-proto": "https",
+                    "origin": "https://[2001:db8::7]",
+                }).status_code,
+                403,
+            )
+            self.assertEqual(
+                self.client.get("/api/version", headers={
+                    "host": "127.0.0.1:8766",
+                    "x-forwarded-host": "[2001:db8::7]:",
                     "x-forwarded-proto": "https",
                     "origin": "https://[2001:db8::7]",
                 }).status_code,
