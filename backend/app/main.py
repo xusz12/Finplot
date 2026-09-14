@@ -248,7 +248,9 @@ def checked_at() -> str:
 
 
 def effective_port(scheme: str, port: int | None) -> int:
-    return port or (443 if scheme.lower() == "https" else 80)
+    # ``0`` is an explicit port, not an omitted one.  Callers must preserve
+    # that distinction so an invalid/falsy port cannot collapse to a default.
+    return (443 if scheme.lower() == "https" else 80) if port is None else port
 
 
 def has_forbidden_authority_chars(value: str) -> bool:
@@ -272,7 +274,7 @@ def parse_host_header(value: str | None) -> tuple[str, int | None] | None:
         port = parts.port
     except ValueError:
         return None
-    if (not hostname or parts.username or parts.password or parts.path
+    if (not hostname or port == 0 or parts.username or parts.password or parts.path
             or parts.query or parts.fragment):
         return None
     return hostname.lower(), port
@@ -421,14 +423,16 @@ def same_origin(origin: str, target: tuple[str, str, int]) -> bool:
     try:
         origin_parts = urlsplit(origin)
         scheme, host, port = target
+        origin_port = origin_parts.port
         return (origin_parts.scheme.lower() in {"http", "https"}
                 and not origin_parts.netloc.endswith(":")
+                and origin_port != 0
                 and not origin_parts.username and not origin_parts.password
                 and origin_parts.path in {"", "/"} and not origin_parts.query and not origin_parts.fragment
                 and origin_parts.hostname is not None
                 and origin_parts.hostname.lower() == host
                 and origin_parts.scheme.lower() == scheme
-                and effective_port(origin_parts.scheme, origin_parts.port) == port)
+                and effective_port(origin_parts.scheme, origin_port) == port)
     except ValueError:
         return False
 

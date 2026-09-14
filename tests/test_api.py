@@ -162,6 +162,11 @@ class ObservatoryApiTests(unittest.TestCase):
                 f"https://{public_host}/path",
                 f"https://{public_host}\tmini",
                 f"https://{public_host}\t",
+                f"https://{public_host}:0",
+                f"https://{public_host}:00",
+                f"https://{public_host}:000",
+                f"https://{public_host}:65536",
+                f"https://{public_host}:-1",
             ):
                 with self.subTest(malformed_origin=malformed_origin):
                     self.assertEqual(
@@ -172,6 +177,24 @@ class ObservatoryApiTests(unittest.TestCase):
                 with self.subTest(malformed_request_host=malformed_request_host):
                     self.assertEqual(
                         proxy.get("/api/version", headers={**forwarded, "host": malformed_request_host}).status_code,
+                        403,
+                    )
+            for invalid_port in ("0", "00", "000", "65536", "-1"):
+                with self.subTest(surface="host", invalid_port=invalid_port):
+                    self.assertEqual(
+                        proxy.get("/api/version", headers={
+                            "host": f"{public_host}:{invalid_port}",
+                            "x-forwarded-proto": "https",
+                            "origin": f"https://{public_host}",
+                        }).status_code,
+                        403,
+                    )
+                with self.subTest(surface="x-forwarded-host", invalid_port=invalid_port):
+                    self.assertEqual(
+                        proxy.get("/api/version", headers={
+                            **forwarded,
+                            "x-forwarded-host": f"{public_host}:{invalid_port}",
+                        }).status_code,
                         403,
                     )
             self.assertEqual(
@@ -282,6 +305,7 @@ class ObservatoryApiTests(unittest.TestCase):
             )
         for invalid_host in (
             "*.ts.net", "a..b.example", "a,b.example", "a.example:443", "a.example:",
+            "a.example:0", "a.example:00", "a.example:000", "a.example:65536", "a.example:-1",
             "a.example?", "a.example#", "a.example\t", "a.example\x01", "[2001:db8::7]:",
         ):
             with self.subTest(invalid_host=invalid_host), patch.dict(os.environ, {"FINPLOT_PUBLIC_HOST": invalid_host}):
