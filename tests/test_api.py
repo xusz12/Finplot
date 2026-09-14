@@ -134,6 +134,18 @@ class ObservatoryApiTests(unittest.TestCase):
                 proxy.get("/api/version", headers={**forwarded, "x-forwarded-proto": "http"}).status_code,
                 403,
             )
+            for malformed_host in (f"{public_host}?", f"{public_host}#"):
+                with self.subTest(malformed_host=malformed_host):
+                    self.assertEqual(
+                        proxy.get("/api/version", headers={**forwarded, "x-forwarded-host": malformed_host}).status_code,
+                        403,
+                    )
+            for malformed_origin in (f"https://{public_host}?", f"https://{public_host}#"):
+                with self.subTest(malformed_origin=malformed_origin):
+                    self.assertEqual(
+                        proxy.get("/api/version", headers={**forwarded, "origin": malformed_origin}).status_code,
+                        403,
+                    )
             self.assertEqual(
                 proxy.get("/api/version", headers={**forwarded, "x-forwarded-host": f"{public_host},evil.test"}).status_code,
                 403,
@@ -240,7 +252,7 @@ class ObservatoryApiTests(unittest.TestCase):
                 }).status_code,
                 403,
             )
-        for invalid_host in ("*.ts.net", "a..b.example", "a,b.example", "a.example:443", "a.example:", "[2001:db8::7]:"):
+        for invalid_host in ("*.ts.net", "a..b.example", "a,b.example", "a.example:443", "a.example:", "a.example?", "a.example#", "[2001:db8::7]:"):
             with self.subTest(invalid_host=invalid_host), patch.dict(os.environ, {"FINPLOT_PUBLIC_HOST": invalid_host}):
                 self.assertEqual(
                     self.client.get("/api/version", headers={

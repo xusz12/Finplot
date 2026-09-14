@@ -253,7 +253,8 @@ def effective_port(scheme: str, port: int | None) -> int:
 
 def parse_host_header(value: str | None) -> tuple[str, int | None] | None:
     """Parse an HTTP Host value without accepting URL/path syntax."""
-    if not value or value != value.strip() or any(char in value for char in "\r\n"):
+    if (not value or value != value.strip() or any(char in value for char in "\r\n")
+            or "?" in value or "#" in value):
         return None
     # ``urlsplit`` normalises an empty port (``example.test:`` or
     # ``[2001:db8::1]:``) to ``None``.  Keep that distinct from a host with
@@ -411,6 +412,8 @@ def request_target(request: Request) -> tuple[str, str, int] | None:
 
 
 def same_origin(origin: str, target: tuple[str, str, int]) -> bool:
+    if "?" in origin or "#" in origin:
+        return False
     try:
         origin_parts = urlsplit(origin)
         scheme, host, port = target
