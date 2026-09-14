@@ -5,6 +5,7 @@ import base64
 import binascii
 import calendar
 import hashlib
+import ipaddress
 import json
 import os
 import re
@@ -32,6 +33,7 @@ NATURE_ORDER = ("日常", "投资", "往来", "调整")
 GRAIN_VALUES = {"day", "month", "quarter", "half", "year"}
 COMPARE_VALUES = {"previous", "year_ago", "custom", "none"}
 LOOPBACK_HOSTS = {"127.0.0.1", "localhost", "::1"}
+PUBLIC_HOST_ENV = "FINPLOT_PUBLIC_HOST"
 SHANGHAI = ZoneInfo("Asia/Shanghai")
 
 
@@ -249,18 +251,147 @@ def effective_port(scheme: str, port: int | None) -> int:
     return port or (443 if scheme.lower() == "https" else 80)
 
 
-def same_origin(request: Request, origin: str) -> bool:
+def parse_host_header(value: str | None) -> tuple[str, int | None] | None:
+    """Parse an HTTP Host value without accepting URL/path syntax."""
+    if not value or value != value.strip() or any(char in value for char in "\r\n"):
+        return None
+    try:
+        parts = urlsplit(f"//{value}")
+        hostname = parts.hostname
+        port = parts.port
+    except ValueError:
+        return None
+    if (not hostname or parts.username or parts.password or parts.path
+            or parts.query or parts.fragment):
+        return None
+    return hostname.lower(), port
+
+
+def configured_public_host() -> str | None:
+    """Return the one explicitly configured Tailscale host, if valid.
+
+    An empty or malformed value deliberately disables proxied public access;
+    there is no wildcard or implicit ``*.ts.net`` trust.
+    """
+    raw = os.environ.get(PUBLIC_HOST_ENV, "")
+    if not raw or raw != raw.strip() or "," in raw:
+        return None
+    parsed = parse_host_header(raw.lower())
+    if parsed is None:
+        return None
+    hostname, port = parsed
+    if port is not None or hostname in LOOPBACK_HOSTS or hostname != raw.lower():
+        return None
+    return hostname
+
+
+def is_loopback_peer(request: Request) -> bool:
+    client = request.client
+    if client is None:
+        return False
+    host = (client.host or "").lower()
+    if host in LOOPBACK_HOSTS:
+        return True
+    try:
+        return ipaddress.ip_address(host).is_loopback
+    except ValueError:
+        return False
+
+
+def single_header(request: Request, name: str) -> tuple[bool, str | None]:
+    """Read one proxy header and reject comma-joined or empty values."""
+    raw = request.headers.get(name)
+    if raw is None:
+        return False, None
+    value = raw.strip()
+    if not value or "," in value or any(char in value for char in "\r\n"):
+        return True, None
+    return True, value
+
+
+def has_forwarded_headers(request: Request) -> bool:
+    return any(
+        name.lower() == "forwarded" or name.lower().startswith("x-forwarded-")
+        for name in request.headers.keys()
+    )
+
+
+def request_target(request: Request) -> tuple[str, str, int] | None:
+    """Resolve the trusted browser-visible scheme/host/port.
+
+    Finplot is normally called directly over loopback.  Tailscale Serve may
+    connect from loopback while forwarding the browser host and HTTPS scheme;
+    those headers are considered only when the immediate peer is loopback and
+    the host is the exact configured ``FINPLOT_PUBLIC_HOST``.
+    """
+    host_parts = parse_host_header(request.headers.get("host"))
+    if host_parts is None:
+        return None
+    host, port = host_parts
+    peer_is_loopback = is_loopback_peer(request)
+    forwarded_present = has_forwarded_headers(request)
+    if forwarded_present and not peer_is_loopback:
+        return None
+    # Standard Forwarded syntax is not needed by the Tailscale Serve contract;
+    # fail closed instead of accepting an alternate, less-tested grammar.
+    if request.headers.get("forwarded") is not None:
+        return None
+
+    forwarded_host_present, forwarded_host_raw = single_header(request, "x-forwarded-host")
+    forwarded_proto_present, forwarded_proto = single_header(request, "x-forwarded-proto")
+    if (forwarded_host_present and forwarded_host_raw is None) or (
+            forwarded_proto_present and forwarded_proto is None):
+        return None
+    forwarded_host = parse_host_header(forwarded_host_raw) if forwarded_host_present else None
+    if forwarded_host_present and forwarded_host is None:
+        return None
+    if forwarded_proto_present and forwarded_proto not in {"http", "https"}:
+        return None
+
+    public_host = configured_public_host()
+    if forwarded_host_present:
+        forwarded_hostname, forwarded_port = forwarded_host
+        if (public_host is None or forwarded_hostname != public_host
+                or (forwarded_port is not None and forwarded_port != 443)):
+            return None
+        effective_host = public_host
+        effective_scheme = forwarded_proto or request.url.scheme.lower()
+    elif host == public_host:
+        if port is not None and port != 443:
+            return None
+        effective_host = public_host
+        effective_scheme = forwarded_proto or request.url.scheme.lower()
+    elif host in LOOPBACK_HOSTS:
+        # When the proxy keeps the backend Host as loopback, the explicit
+        # configured public host supplies the browser-visible hostname.  The
+        # forwarded HTTPS scheme is still mandatory; without it this remains a
+        # normal direct loopback request.
+        if forwarded_proto_present:
+            if public_host is None or forwarded_proto != "https":
+                return None
+            return "https", public_host, 443
+        if not peer_is_loopback:
+            return None
+        return request.url.scheme.lower(), host, effective_port(request.url.scheme, port)
+    else:
+        return None
+
+    if not peer_is_loopback or effective_scheme != "https":
+        return None
+    return "https", effective_host, 443
+
+
+def same_origin(origin: str, target: tuple[str, str, int]) -> bool:
     try:
         origin_parts = urlsplit(origin)
-        host_parts = urlsplit(f"//{request.headers.get('host', '')}")
+        scheme, host, port = target
         return (origin_parts.scheme.lower() in {"http", "https"}
                 and not origin_parts.username and not origin_parts.password
                 and origin_parts.path in {"", "/"} and not origin_parts.query and not origin_parts.fragment
-                and not host_parts.username and not host_parts.password and not host_parts.path
-                and origin_parts.scheme.lower() == request.url.scheme.lower()
-                and origin_parts.hostname is not None and host_parts.hostname is not None
-                and origin_parts.hostname.lower() == host_parts.hostname.lower()
-                and effective_port(origin_parts.scheme, origin_parts.port) == effective_port(request.url.scheme, host_parts.port))
+                and origin_parts.hostname is not None
+                and origin_parts.hostname.lower() == host
+                and origin_parts.scheme.lower() == scheme
+                and effective_port(origin_parts.scheme, origin_parts.port) == port)
     except ValueError:
         return False
 
@@ -289,17 +420,11 @@ app.add_middleware(CORSMiddleware, allow_origins=[], allow_methods=[], allow_hea
 
 @app.middleware("http")
 async def privacy_headers(request: Request, call_next):
-    try:
-        host_parts = urlsplit(f"//{request.headers.get('host', '')}")
-        host = (host_parts.hostname or "").lower()
-        host_parts.port  # force malformed ports to fail closed
-        valid_host = host in LOOPBACK_HOSTS and not host_parts.username and not host_parts.password and not host_parts.path
-    except ValueError:
-        valid_host = False
+    target = request_target(request)
     origin = request.headers.get("origin")
-    if not valid_host:
+    if target is None:
         return JSONResponse({"detail": "loopback host required"}, status_code=403)
-    if origin and not same_origin(request, origin):
+    if origin and not same_origin(origin, target):
         return JSONResponse({"detail": "same-origin required"}, status_code=403)
     response = await call_next(request)
     response.headers["Cache-Control"] = "no-store"

@@ -18,7 +18,7 @@ class ObservatoryApiTests(unittest.TestCase):
         self.db = Path(self.tmp.name) / "fixture.sqlite3"
         make(self.db)
         os.environ["LEDGER_DB"] = str(self.db)
-        self.client = TestClient(app)
+        self.client = TestClient(app, client=("127.0.0.1", 50000))
 
     def get(self, *args, **kwargs):
         headers = kwargs.pop("headers", {})
@@ -88,6 +88,77 @@ class ObservatoryApiTests(unittest.TestCase):
         self.assertEqual(self.get("/api/dashboard", headers={"origin":"https://localhost"}).status_code, 403)
         self.assertEqual(self.get("/api/dashboard", headers={"origin":"http://localhost:9999"}).status_code, 403)
         self.assertEqual(self.get("/api/dashboard", params={"limit":201}).status_code, 422)
+
+    def test_tailscale_proxy_requires_exact_https_host_and_loopback_peer(self):
+        public_host = "xmac-mini-1.tailef8d6d.ts.net"
+        with patch.dict(os.environ, {"FINPLOT_PUBLIC_HOST": public_host}):
+            proxy = TestClient(app, client=("127.0.0.1", 50001))
+            forwarded = {
+                "host": "127.0.0.1:8766",
+                "x-forwarded-host": f"{public_host}:443",
+                "x-forwarded-proto": "https",
+                "origin": f"https://{public_host}/",
+            }
+            self.assertEqual(proxy.get("/api/version", headers=forwarded).status_code, 200)
+            self.assertEqual(
+                proxy.get("/api/version", headers={
+                    "host": "127.0.0.1:8766",
+                    "x-forwarded-proto": "https",
+                    "origin": f"https://{public_host}",
+                }).status_code,
+                200,
+            )
+
+            # Tailscale may preserve the public Host instead of sending
+            # X-Forwarded-Host; the HTTPS scheme is still required.
+            preserved_host = {
+                "host": public_host,
+                "x-forwarded-proto": "https",
+                "origin": f"https://{public_host}",
+            }
+            self.assertEqual(proxy.get("/api/version", headers=preserved_host).status_code, 200)
+            self.assertEqual(
+                proxy.get("/api/version", headers={**preserved_host, "origin": f"http://{public_host}"}).status_code,
+                403,
+            )
+
+            self.assertEqual(
+                proxy.get("/api/version", headers={**forwarded, "x-forwarded-host": "other.ts.net"}).status_code,
+                403,
+            )
+            self.assertEqual(
+                proxy.get("/api/version", headers={**forwarded, "x-forwarded-proto": "http"}).status_code,
+                403,
+            )
+            self.assertEqual(
+                proxy.get("/api/version", headers={**forwarded, "x-forwarded-host": f"{public_host},evil.test"}).status_code,
+                403,
+            )
+            self.assertEqual(
+                proxy.get("/api/version", headers={**forwarded, "forwarded": f"host={public_host};proto=https"}).status_code,
+                403,
+            )
+
+            remote = TestClient(app, client=("203.0.113.10", 50002))
+            self.assertEqual(remote.get("/api/version", headers=forwarded).status_code, 403)
+            self.assertEqual(
+                remote.get("/api/version", headers={
+                    "host": "127.0.0.1:8766",
+                    "x-forwarded-for": "203.0.113.10",
+                }).status_code,
+                403,
+            )
+
+    def test_public_proxy_access_is_disabled_without_explicit_host_config(self):
+        with patch.dict(os.environ, {"FINPLOT_PUBLIC_HOST": ""}):
+            self.assertEqual(self.get("/api/version").status_code, 200)
+            self.assertEqual(
+                self.client.get("/api/version", headers={
+                    "host": "xmac-mini-1.tailef8d6d.ts.net",
+                    "x-forwarded-proto": "https",
+                }).status_code,
+                403,
+            )
 
     def test_version_changes_for_writes_and_initial_load_is_valid(self):
         query = {"kind": "month", "value": "2026-09"}

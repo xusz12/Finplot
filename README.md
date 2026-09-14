@@ -40,6 +40,34 @@ LEDGER_DB=/absolute/path/to/ledger.sqlite3 \
 
 浏览器打开 `http://127.0.0.1:8766/`。终端保持运行；使用 `Ctrl-C` 停止实例。Finplot 不修改 `LEDGER_DB` 指向的数据库。
 
+### v0.1.1 私网代理与手动启动脚本
+
+v0.1.1 保持应用只绑定 `127.0.0.1`。Tailscale Serve 在 HTTPS `443` 终止后转发到这个 loopback 服务；Finplot 只在请求的直接对端也是 loopback 时信任 `X-Forwarded-Host` 和 `X-Forwarded-Proto`，并且只接受显式配置的完整主机名。当前批准的主机名是 `xmac-mini-1.tailef8d6d.ts.net`，不接受任意 `.ts.net` 后缀、其他 Host 或伪造的转发头；Origin 也必须与实际的 HTTP/HTTPS Host 和端口完全同源。未设置 `FINPLOT_PUBLIC_HOST` 时，外部代理访问保持关闭，loopback 页面仍可用。
+
+`scripts/start-finplot.sh` 是手动前台启动脚本。它固定绑定 `127.0.0.1`、默认端口 `8766`、关闭访问日志，并要求调用者显式提供 `LEDGER_DB`。它不会安装或配置 launchd，也不会配置 Tailscale；终端保持运行，按 `Ctrl-C` 停止。
+
+正式版迁移到 `/Users/x/Finplot` 后，真实账本只读启动示例：
+
+```sh
+cd /Users/x/Finplot
+LEDGER_DB=/absolute/path/to/ledger.sqlite3 \
+FINPLOT_PUBLIC_HOST=xmac-mini-1.tailef8d6d.ts.net \
+  ./scripts/start-finplot.sh
+```
+
+只在本机查看时可以省略 `FINPLOT_PUBLIC_HOST`；浏览器打开 `http://127.0.0.1:8766/`。如果通过 Tailscale Serve 查看，打开 `https://xmac-mini-1.tailef8d6d.ts.net/`，但仍须先在该终端启动 Finplot。
+
+开发版使用隔离合成库和独立端口：
+
+```sh
+cd /Users/x/Finplot-dev
+python3 tests/make_fixture.py /tmp/finplot-dev.sqlite3
+LEDGER_DB=/tmp/finplot-dev.sqlite3 FINPLOT_PORT=8775 \
+  ./scripts/start-finplot.sh
+```
+
+脚本不接受覆盖绑定地址的参数，避免把账单服务意外暴露到 `0.0.0.0`；开发、测试和远程验证均不得指向真实账本。
+
 ### 合成数据库演示或开发验证
 
 测试数据库只能使用隔离的合成文件：
@@ -64,7 +92,7 @@ LEDGER_DB=/tmp/finplot-demo.sqlite3 \
 - 日、月、季度、半年、年粒度的趋势、累计趋势、12 个月概览和月度支出日历；
 - 数据版本检测与自动刷新：页面每两秒轮询 `/api/version`，仅在数据指纹改变时重新加载；
 - 所有金额字段以十进制字符串表达整数分，平均值和日均值同时提供精确的分子/分母；
-- 本地资源、同源访问和只读 API，不依赖 CDN 或第三方分析服务。
+- 本地资源、同源访问和只读 API，不依赖 CDN 或第三方分析服务；通过受限 loopback 代理访问时只信任显式 Tailscale Host 和 HTTPS Origin。
 
 页面采用本地 JavaScript/CSS 资源。桌面端提供固定导航、分组筛选、四张财务摘要卡、投资摘要条、日收入/支出图表、分类钻取和交易表；窄屏时导航移到内容上方，卡片使用双列布局，长序列与宽表格在面板内滚动。
 
@@ -75,7 +103,7 @@ LEDGER_DB=/tmp/finplot-demo.sqlite3 \
 - `GET /api/version`：返回数据集版本指纹，用于检测刷新。
 - `/docs`：本地 API 文档。
 
-接口对所有 `*_cents` 字段返回十进制字符串；过期的 `version` 或 `if_version` 返回 `409`，无效组合返回 `422`。响应使用 `Cache-Control: no-store`；服务限制 loopback Host、同源 Origin 和同源 CSP。请求日志不记录查询参数或交易数据。
+接口对所有 `*_cents` 字段返回十进制字符串；过期的 `version` 或 `if_version` 返回 `409`，无效组合返回 `422`。响应使用 `Cache-Control: no-store`；服务限制 loopback Host、显式 Tailscale Host、同源 Origin 和同源 CSP。请求日志不记录查询参数或交易数据。代理模式只接受来自 loopback 对端的 `X-Forwarded-Host`/`X-Forwarded-Proto`，不接受标准 `Forwarded` 或非 loopback 伪造转发头。
 
 真实账本只允许只读查询。测试、刷新竞争和接口验证必须使用隔离的临时 SQLite 数据库；不得执行迁移、写入、删除、重置真实数据库，也不得将真实账本、密钥、个人配置或敏感证据提交到 Git。
 
@@ -87,6 +115,12 @@ LEDGER_DB=/tmp/finplot-demo.sqlite3 \
 
 ```sh
 python3 -m unittest discover -s tests -v
+```
+
+检查手动脚本语法：
+
+```sh
+sh -n scripts/start-finplot.sh
 ```
 
 运行隔离且可复现的合成性能检查：

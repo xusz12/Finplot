@@ -63,7 +63,7 @@ def endpoint_ms(client: TestClient, params: dict[str, str], repetitions: int = 2
 
 def _poll_versions(stop: threading.Event, started: threading.Event, stats: dict[str, int]) -> None:
     """Run an uninterrupted version-probe client beside the SQLite writer."""
-    with TestClient(app) as client:
+    with TestClient(app, client=("127.0.0.1", 50011)) as client:
         while not stop.is_set():
             try:
                 response = client.get("/api/version", headers=HEADERS)
@@ -135,7 +135,7 @@ def main() -> None:
         baseline = Path(directory) / "baseline.sqlite3"
         seed(baseline)
         os.environ["LEDGER_DB"] = str(baseline)
-        client = TestClient(app)
+        client = TestClient(app, client=("127.0.0.1", 50010))
         initial = endpoint_ms(client, {"kind": "all"})
         filtered = endpoint_ms(client, {"kind": "all", "nature": "日常", "direction": "支出"})
         drill = endpoint_ms(client, {"kind": "all", "category": "exp_food"})
