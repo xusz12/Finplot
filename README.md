@@ -57,6 +57,26 @@ FINPLOT_PUBLIC_HOST=xmac-mini-1.tailef8d6d.ts.net \
 
 只在本机查看时可以省略 `FINPLOT_PUBLIC_HOST`；浏览器打开 `http://127.0.0.1:8766/`。如果通过 Tailscale Serve 查看，打开 `https://xmac-mini-1.tailef8d6d.ts.net/`，但仍须先在该终端启动 Finplot。
 
+### 直接通过 Tailscale IP 手动启动
+
+`start-finplot.sh` 默认仍使用 loopback；只有显式选择 `tailscale-beta` 或 `tailscale-stable` 才会直连。脚本每次调用 `tailscale ip -4` 获取本机地址，只接受 Tailscale 的 `100.64.0.0/10` IPv4 并只绑定该精确地址；Tailscale 不可用、返回多个/异常地址或端口无效时直接退出，绝不退回 `0.0.0.0` 或普通局域网地址。直连模式拒绝所有 `Forwarded`/`X-Forwarded-*` 头，并要求 Host、Origin、IP 和端口完全一致。
+
+beta 默认端口 8775，正式版默认端口 8766；都可通过合法的 `FINPLOT_PORT` 覆盖：
+
+```sh
+cd /Users/x/Finplot-dev
+LEDGER_DB=/absolute/path/to/ledger.sqlite3 \
+  ./scripts/start-finplot.sh tailscale-beta
+
+cd /Users/x/Finplot
+LEDGER_DB=/absolute/path/to/ledger.sqlite3 \
+  ./scripts/start-finplot.sh tailscale-stable
+```
+
+浏览器打开脚本所绑定的地址，例如 beta 为 `http://100.86.236.103:8775/`。这只面向同一 tailnet 内受 ACL 允许的设备，不启用 Serve/Funnel，也不会开放到普通局域网或公网。
+
+只有已经冻结并经 Checker 通过的 beta 才允许由用户手动指定真实账本做只读验收；普通开发和自动测试继续只使用隔离合成库。应用仍以 SQLite `mode=ro` 和 `PRAGMA query_only=ON` 打开账本，不自动寻找、复制或修改真实账本。
+
 开发版使用隔离合成库和独立端口：
 
 ```sh

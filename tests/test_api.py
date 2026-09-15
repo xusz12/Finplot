@@ -275,6 +275,50 @@ class ObservatoryApiTests(unittest.TestCase):
                 403,
             )
 
+    def test_direct_tailscale_access_requires_exact_target_and_rejects_proxy_headers(self):
+        direct_env = {
+            "FINPLOT_DIRECT_HOST": "100.86.236.103",
+            "FINPLOT_DIRECT_PORT": "8775",
+            "FINPLOT_PUBLIC_HOST": "",
+        }
+        with patch.dict(os.environ, direct_env):
+            client = TestClient(app, base_url="http://100.86.236.103:8775", client=("100.100.20.30", 50100))
+            valid = {"host": "100.86.236.103:8775", "origin": "http://100.86.236.103:8775"}
+            self.assertEqual(client.get("/api/version", headers=valid).status_code, 200)
+            for headers in (
+                {**valid, "host": "100.86.236.103:8766"},
+                {**valid, "host": "100.86.236.103:0"},
+                {**valid, "host": "100.86.236.103:00"},
+                {**valid, "host": "100.86.236.103:65536"},
+                {**valid, "host": "100.86.236.103:"},
+                {**valid, "host": "127.0.0.1:8775"},
+                {**valid, "origin": "http://100.86.236.103:8766"},
+                {**valid, "origin": "http://100.86.236.104:8775"},
+                {**valid, "origin": "https://100.86.236.103:8775"},
+                {**valid, "origin": "http://100.86.236.103:0"},
+                {**valid, "origin": "http://100.86.236.103:65536"},
+                {**valid, "origin": "http://100.86.236.103:8775/path"},
+                {**valid, "x-forwarded-proto": "http"},
+                {**valid, "x-forwarded-host": "100.86.236.103:8775"},
+                {**valid, "forwarded": "for=100.100.20.30"},
+            ):
+                with self.subTest(headers=headers):
+                    self.assertEqual(client.get("/api/version", headers=headers).status_code, 403)
+            non_tailnet_peer = TestClient(app, base_url="http://100.86.236.103:8775", client=("192.168.1.8", 50101))
+            self.assertEqual(non_tailnet_peer.get("/api/version", headers=valid).status_code, 403)
+
+        for invalid_env in (
+            {"FINPLOT_DIRECT_HOST": "", "FINPLOT_DIRECT_PORT": "8775"},
+            {"FINPLOT_DIRECT_HOST": "192.168.1.8", "FINPLOT_DIRECT_PORT": "8775"},
+            {"FINPLOT_DIRECT_HOST": "0.0.0.0", "FINPLOT_DIRECT_PORT": "8775"},
+            {"FINPLOT_DIRECT_HOST": "100.86.236.103", "FINPLOT_DIRECT_PORT": "0"},
+            {"FINPLOT_DIRECT_HOST": "100.86.236.103", "FINPLOT_DIRECT_PORT": "65536"},
+            {"FINPLOT_DIRECT_HOST": "100.86.236.103", "FINPLOT_DIRECT_PORT": "not-a-port"},
+        ):
+            with self.subTest(invalid_env=invalid_env), patch.dict(os.environ, invalid_env):
+                client = TestClient(app, base_url="http://100.86.236.103:8775", client=("100.100.20.30", 50102))
+                self.assertEqual(client.get("/api/version", headers={"host": "100.86.236.103:8775"}).status_code, 403)
+
     def test_public_proxy_access_is_disabled_without_explicit_host_config(self):
         with patch.dict(os.environ, {"FINPLOT_PUBLIC_HOST": ""}):
             self.assertEqual(self.get("/api/version").status_code, 200)

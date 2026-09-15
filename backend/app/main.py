@@ -34,6 +34,9 @@ GRAIN_VALUES = {"day", "month", "quarter", "half", "year"}
 COMPARE_VALUES = {"previous", "year_ago", "custom", "none"}
 LOOPBACK_HOSTS = {"127.0.0.1", "localhost", "::1"}
 PUBLIC_HOST_ENV = "FINPLOT_PUBLIC_HOST"
+DIRECT_HOST_ENV = "FINPLOT_DIRECT_HOST"
+DIRECT_PORT_ENV = "FINPLOT_DIRECT_PORT"
+TAILSCALE_V4 = ipaddress.ip_network("100.64.0.0/10")
 SHANGHAI = ZoneInfo("Asia/Shanghai")
 
 
@@ -308,6 +311,35 @@ def configured_public_host() -> str | None:
     return hostname
 
 
+def configured_direct_target() -> tuple[str, int] | None:
+    """Return the explicit Tailscale IPv4 bind target, if fully valid."""
+    raw_host = os.environ.get(DIRECT_HOST_ENV, "")
+    raw_port = os.environ.get(DIRECT_PORT_ENV, "")
+    if not raw_host and not raw_port:
+        return None
+    if (not raw_host or raw_host != raw_host.strip() or not raw_port
+            or not re.fullmatch(r"[0-9]+", raw_port)):
+        return None
+    try:
+        address = ipaddress.ip_address(raw_host)
+        port = int(raw_port)
+    except ValueError:
+        return None
+    if not isinstance(address, ipaddress.IPv4Address) or address not in TAILSCALE_V4:
+        return None
+    if not 1 <= port <= 65535:
+        return None
+    return str(address), port
+
+
+def is_tailscale_ipv4(value: str) -> bool:
+    try:
+        address = ipaddress.ip_address(value)
+    except ValueError:
+        return False
+    return isinstance(address, ipaddress.IPv4Address) and address in TAILSCALE_V4
+
+
 def is_loopback_peer(request: Request) -> bool:
     client = request.client
     if client is None:
@@ -357,6 +389,20 @@ def request_target(request: Request) -> tuple[str, str, int] | None:
     if host_parts is None:
         return None
     host, port = host_parts
+    direct_requested = DIRECT_HOST_ENV in os.environ or DIRECT_PORT_ENV in os.environ
+    direct_target = configured_direct_target()
+    if direct_requested:
+        if direct_target is None:
+            return None
+        direct_host, direct_port = direct_target
+        forwarded_names = {name.lower() for name in request.headers.keys()
+                           if name.lower() == "forwarded" or name.lower().startswith("x-forwarded-")}
+        if (forwarded_names or host != direct_host or port != direct_port
+                or request.url.scheme.lower() != "http" or request.client is None
+                or not is_tailscale_ipv4(request.client.host or "")):
+            return None
+        return "http", direct_host, direct_port
+
     peer_is_loopback = is_loopback_peer(request)
     forwarded_names = {name.lower() for name in request.headers.keys()
                        if name.lower() == "forwarded" or name.lower().startswith("x-forwarded-")}
