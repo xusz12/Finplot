@@ -2,23 +2,22 @@
 
 Finplot 是运行在本机的只读账单分析观测站。它读取 SQLite 账本，提供按时间范围、方向、性质、标签和分类逐层查看的统计图表；不会执行数据库迁移，也不会写入、删除或修改配置的真实账本。
 
-当前稳定版本为 **v0.1.0**，完整发布历史见 [CHANGELOG.md](CHANGELOG.md)。Git、升级和回退操作见 [GIT-OPERATIONS.md](GIT-OPERATIONS.md)。
+当前稳定版本为 **v0.1.1**，完整发布历史见 [CHANGELOG.md](CHANGELOG.md)。Git、升级和回退操作见 [GIT-OPERATIONS.md](GIT-OPERATIONS.md)。
 
 ## 目录与运行入口
 
-Finplot 采用稳定版 v1 与开发版 v2 分离的目录约定：
+Finplot 使用两个本地目录，但 GitHub 只有 `main` 一个分支：
 
-- 稳定版 v1：`/Users/x/.slock/agents/c131e49e-2176-40c0-9513-5bf482ab810c/billing-observatory`
-  - Git 分支：`main`
-  - 真实账本只读实例：端口 `8766`
-  - 原有合成演示实例仍使用端口 `8765`
-- 开发版 v2：`/Users/x/Finplot-dev`
-  - Git 分支：`develop`
-  - 默认使用合成数据库和独立端口 `8775` 验证；当前未启动开发实例
+- 正式目录：`/Users/x/Finplot`
+  - 跟踪 `main`，用于日常运行真实账本只读实例，默认端口 `8766`
+  - 何时执行 `git pull --ff-only origin main` 完全由用户本人决定，agent 不得代为同步
+- 开发目录：`/Users/x/Finplot-dev`
+  - 在 `main` 上进行开发、修复、commit 和 push
+  - 日常开发默认使用合成数据库和独立端口 `8775`
 - Git 远端：`git@github.com:xusz12/Finplot.git`
-- 首个正式版本：`v0.1.0`
+- 当前发布标签：`v0.1.1`（已验收代码 `049f8b98124f00868bbc7ed98c9550a87a8190a0`）
 
-`8765` 是稳定目录现有的合成演示服务，不是 v2 入口；启动或停止 v2 前必须重新核对端口和进程归属，不得误停现有服务。`8775` 仅是 v2 的默认启动端口约定，未启动不代表已有运行实例。
+`8775` 是开发版/beta 的默认端口，`8766` 是正式版默认端口。启动或停止前必须重新核对端口和进程归属，不得根据目录或端口名猜测当前实例。
 
 ## 安装与启动
 
@@ -86,7 +85,7 @@ LEDGER_DB=/tmp/finplot-dev.sqlite3 FINPLOT_PORT=8775 \
   ./scripts/start-finplot.sh
 ```
 
-脚本不接受覆盖绑定地址的参数，避免把账单服务意外暴露到 `0.0.0.0`；开发、测试和远程验证均不得指向真实账本。
+脚本不接受覆盖绑定地址的参数，避免把账单服务意外暴露到 `0.0.0.0`。普通开发和自动测试不得指向真实账本；只有已经冻结并经 Checker 通过的 beta，才可由用户手动指定真实账本做只读验收。
 
 ### 合成数据库演示或开发验证
 
@@ -98,7 +97,7 @@ LEDGER_DB=/tmp/finplot-demo.sqlite3 \
   .venv/bin/uvicorn backend.app.main:app --host 127.0.0.1 --port 8775
 ```
 
-开发版 v2 使用 `/Users/x/Finplot-dev` 和 `develop` 分支；启动前确认 `8775` 未被占用。不要把真实账本复制到开发目录或测试目录。
+开发版使用 `/Users/x/Finplot-dev` 的 `main` 分支；启动前确认 `8775` 未被占用。不要把真实账本复制到开发目录或测试目录。
 
 ## 功能范围
 
@@ -153,8 +152,8 @@ sh -n scripts/start-finplot.sh
 
 ## 发布与升级
 
-`main` 只接收已冻结、经用户验收的精确提交。功能或逻辑变更按项目流程先完成自验和审核；Git 管理员在操作前 fresh 检查 HEAD、远端、候选文件、工作区和用户已有修改，只提交批准范围，commit 信息使用简体中文。发布、稳定目录升级和运行重启是三个分别记录的动作。
+GitHub 只使用 `main` 分支。开发、修复、commit 和 push 都在 `/Users/x/Finplot-dev` 进行；功能或逻辑变更按项目流程完成自验、审核和用户验收。Git 管理员在操作前 fresh 检查 HEAD、远端、候选文件、工作区和用户已有修改，只提交批准范围，commit 信息使用简体中文。
 
-升级前必须记录旧提交和启动配置，确认稳定目录 clean、没有分叉、目标提交已验收，再执行 `git fetch origin main` 和 `git pull --ff-only origin main`。升级后按原配置重启 `8766`，完成页面、API 和只读数据冒烟检查。
+正式目录是否升级完全由用户本人决定；agent 不得代为同步。用户升级前应记录旧提交和启动配置，确认 `/Users/x/Finplot` 工作区 clean、没有分叉、目标提交已验收，再执行 `git fetch origin main` 和 `git pull --ff-only origin main`。升级后由用户按原配置手动启动 `8766`，完成页面、API 和只读数据冒烟检查。
 
 如果升级失败，停止新实例并保留失败证据，使用升级前记录的提交和启动配置恢复；不得用 reset 覆盖用户改动，不得修改真实数据库。详细命令和回退边界见 [GIT-OPERATIONS.md](GIT-OPERATIONS.md)。

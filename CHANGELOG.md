@@ -4,15 +4,17 @@ Finplot 的完整发布历史集中记录于此；使用方法和当前稳定版
 
 ## [未发布]
 
-### 2026-09-14
+暂无。
 
-- 将 v2 开发验证的默认独立端口校正为 `8775`。
-- 明确原稳定目录的合成演示实例继续使用 `8765`，真实账本只读实例使用 `8766`，避免误停现有服务。
-- 将 README 全量改为中文，补充项目用途、安装启动、v1/v2 目录、端口、真实账本只读边界、验证和升级规则入口。
+## [v0.1.1] - 2026-09-16
+
+- 将 beta 开发验证的默认独立端口设为 `8775`，正式版默认端口设为 `8766`。
+- 将 README 全量改为中文，补充项目用途、安装启动、正式/开发目录、端口、真实账本只读边界、验证和升级规则入口。
 - 补充源码与运行数据的 Git 边界说明。
 - v0.1.1 后端通过显式 `FINPLOT_PUBLIC_HOST` 支持操作者指定的单一 Tailscale Serve 主机（正式部署为 `xmac-mini-1.tailef8d6d.ts.net`），未配置或格式无效时保持 loopback-only；仅信任 loopback 代理转发的 HTTPS Host/Origin，要求转发头单值且格式有效，并拒绝重复、多值、未知、非 loopback 或伪造转发头。
 - 新增显式 `tailscale-beta` / `tailscale-stable` 手动启动模式：动态取得并仅绑定本机 Tailscale IPv4，beta/正式默认端口分别为 8775/8766；直连请求必须精确匹配 HTTP Host/Origin 与端口，所有代理转发头均拒绝，默认 loopback 与既有 Serve 路径保持不变。
 - 新增 `scripts/start-finplot.sh` 手动前台启动脚本：固定绑定 `127.0.0.1`、要求 `LEDGER_DB`、支持独立 `FINPLOT_PORT`，不安装或配置 launchd。
+- GitHub 统一只使用 `main` 分支：`/Users/x/Finplot-dev` 负责开发、修复、commit 和 push；`/Users/x/Finplot` 仅供日常使用，何时 pull 完全由用户本人决定，agent 不代为同步。
 
 ## [v0.1.0] - 2026-09-14
 
